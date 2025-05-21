@@ -1,1 +1,1 @@
-<img src="data/wichtiges_bild.png" alt="Schmetterlings" width="600"/>
+<img src="data/wichtigesbild.png" alt="Schmetterlings" width="600"/>
