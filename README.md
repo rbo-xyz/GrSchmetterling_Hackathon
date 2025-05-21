@@ -1,1 +1,1 @@
-![Hallo Schmetterlings!!!](data/wichtiges_bild.png)
+<img src="data/wichtiges_bild.png" alt="Schmetterlings" width="600"/>
