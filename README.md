@@ -1,0 +1,1 @@
+![Hallo Schmetterlings!!!](data/wichtiges_bild.png)
