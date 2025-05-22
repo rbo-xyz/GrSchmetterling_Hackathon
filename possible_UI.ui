@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
+    <width>736</width>
     <height>700</height>
    </rect>
   </property>
@@ -33,7 +33,14 @@
       <item>
        <widget class="QPushButton" name="pushButtonLoad">
         <property name="text">
-         <string>GPX/KML laden</string>
+         <string>GPX laden</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonCalculate">
+        <property name="text">
+         <string>Starte Berechnung</string>
         </property>
        </widget>
       </item>
