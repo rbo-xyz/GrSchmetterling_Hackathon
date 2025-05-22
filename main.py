@@ -1,7 +1,7 @@
 #import Files für Berechnung
 from src.calculate import calc_leistungskm
 from src.import_gpx import import_gpx
-# from src.results import 
+from src.maps import generate_elevation_plot 
 
 #import Module
 from PyQt5 import uic
@@ -9,6 +9,8 @@ from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox,QGra
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QPixmap
 import sys
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
 
 
 class MarschzeitBerechnung(QWidget):
@@ -48,13 +50,19 @@ class MarschzeitBerechnung(QWidget):
         else:
             #import der GPS Datei über den Importer
             self.gdf_imp = import_gpx(self.filename_i)
+            print("Import wurde ausgeführt")
             # Berechnung der Leistungskilometer, Marschzeit, Distanz und Höhenmeter
-            self.gdf_calc, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit = calc_leistungskm(self.gdf_imp)
+            self.gdf_calc, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min = calc_leistungskm(self.gdf_imp)
+            print("Berechnung wurde ausgeführt")
             #Darstellung des Höhenprofils im UI
             #TODO
+            self.fig = #TODO
+            self.graphicsViewProfil.setScene(QGraphicsScene())
+            canvas = FigureCanvas(self.fig)
+            proxy = self.graphicsViewProfil.scene().addWidget(canvas)
 
             # Abfüllen der Summary im UI
-            self.labelSummary.setText(f"Gesamtsumme: Distanz: {self.tot_dist} km | Hoehenmeter: {self.tot_hm_pos} m und {self.tot_hm_neg} m | Marschzeit: {self.tot_marschzeit} min")
+            self.labelSummary.setText(f"Gesamtsumme: Distanz: {self.tot_dist} km | Hoehenmeter: {self.tot_hm_pos} m und {self.tot_hm_neg} m | Marschzeit: {self.tot_marschzeit_h}:{self.tot_marschzeit_h} h")
             # Ausgabe des Geodatframes für den Export
             return self.gdf_calc
 
