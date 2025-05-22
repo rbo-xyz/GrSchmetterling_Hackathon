@@ -5,8 +5,9 @@ from src.import_gpx import import_gpx
 
 #import Module
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox,QGraphicsScene
 from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QPixmap
 import sys
 
 
@@ -60,7 +61,7 @@ class MarschzeitBerechnung(QWidget):
         # Hier kommt dein Code zum Laden von GPX-Dateien rein
 
 
-    def zeige_bild(self, bild_pfad):
+    def hoehenprofil_darstellen(self, bild_pfad):
     # Neue Scene erstellen (oder alte löschen)
         scene = QGraphicsScene()
 
