@@ -6,7 +6,7 @@ import pandas as pd
 
 def calc_leistungskm (gdf):
     for idx, row in gdf.iterrows():
-        line = row.geometry
+        line = row.segment_geom
         
         coords = np.array(line.coords)  # extrahiert die Koordinaten als NumPy-Array
         
@@ -34,9 +34,10 @@ def calc_leistungskm (gdf):
         gdf.at[idx, 'Leistungskm [km]'] = leistungskm
         gdf.at[idx, 'Marschzeit [min]'] = mz
 
-        tot_dist = np.sum(km)
-        tot_hm_pos = np.sum(hm<0)
-        tot_hm_neg = np.sum(hm>0)
-        tot_marschzeit = np.sum(mz)
+        tot_dist = round(np.sum(km),3)
+        tot_hm_pos = round(np.sum(h_segs[h_segs > 0]),0)
+        tot_hm_neg = round(np.sum(h_segs[h_segs < 0]),0)
+        tot_marschzeit_h = int(np.sum(mz/60))
+        tot_marschzeit_min = int(round((int(np.sum(mz/60)) - tot_marschzeit_h) * 60))
 
-    return gdf, tot_dist, tot_hm_pos, tot_hm_neg, tot_marschzeit
+    return gdf, tot_dist, tot_hm_pos, tot_hm_neg, tot_marschzeit_h, tot_marschzeit_min
