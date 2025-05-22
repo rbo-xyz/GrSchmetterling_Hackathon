@@ -2,7 +2,7 @@
 from src.calculate import calc_leistungskm
 from src.import_gpx import import_gpx
 from src.maps import generate_elevation_plot 
-#TODO: Import der Export Funktion
+from src.MICHI import export_to_pdf
 
 #import Module
 from PyQt5 import uic
