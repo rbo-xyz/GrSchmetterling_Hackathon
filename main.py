@@ -51,15 +51,19 @@ class MarschzeitBerechnung(QWidget):
             #import der GPS Datei über den Importer
             self.gdf_imp = import_gpx(self.filename_i)
             print("Import wurde ausgeführt")
+
             # Berechnung der Leistungskilometer, Marschzeit, Distanz und Höhenmeter
             self.gdf_calc, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min = calc_leistungskm(self.gdf_imp)
             print("Berechnung wurde ausgeführt")
+            # self.gdf_calc.to_csv("test.csv")
+
             #Darstellung des Höhenprofils im UI
-            #TODO
             self.fig = generate_elevation_plot(self.gdf_calc)
             self.graphicsViewProfil.setScene(QGraphicsScene())
             canvas = FigureCanvas(self.fig)
             proxy = self.graphicsViewProfil.scene().addWidget(canvas)
+            print("Höhenprofil wurde dargestellt")
+            print(self.gdf_calc)
 
             # Abfüllen der Summary im UI
             self.labelSummary.setText(f"Gesamtsumme: Distanz: {self.tot_dist} km | Hoehenmeter: {self.tot_hm_pos} m und {self.tot_hm_neg} m | Marschzeit: {self.tot_marschzeit_h}:{self.tot_marschzeit_h} h")
@@ -67,23 +71,6 @@ class MarschzeitBerechnung(QWidget):
             return self.gdf_calc
 
         # Hier kommt dein Code zum Laden von GPX-Dateien rein
-
-
-    def hoehenprofil_darstellen(self, bild_pfad):
-    # Neue Scene erstellen (oder alte löschen)
-        scene = QGraphicsScene()
-
-    # Pixmap aus Bilddatei laden
-        pixmap = QPixmap(bild_pfad)
-
-    # Pixmap in die Scene einfügen
-        scene.addPixmap(pixmap)
-
-    # Scene in das graphicsView setzen
-        self.graphicsViewProfil.setScene(scene)
-
-    # Optional: Ansicht an Pixmapgröße anpassen
-        self.graphicsViewProfil.fitInView(scene.itemsBoundingRect(), mode=1)
 
 
     def export_pdf(self):

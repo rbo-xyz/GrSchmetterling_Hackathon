@@ -29,8 +29,8 @@ def calc_leistungskm (gdf):
         mz = round((leistungskm / 4 ) * 60, 0) # in Minuten
         
         # In Dataframe schreiben
-        gdf.at[idx, 'Laenge [km]'] = km
-        gdf.at[idx, 'Hoehendiffernez hm [m]'] = hm
+        gdf.at[idx, 'cumulative_km'] = km
+        gdf.at[idx, 'elevation'] = hm
         gdf.at[idx, 'Leistungskm [km]'] = leistungskm
         gdf.at[idx, 'Marschzeit [min]'] = mz
 
