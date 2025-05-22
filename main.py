@@ -8,7 +8,7 @@ from result import generate_report
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Pfadi Route Planner")
+        self.setWindowTitle("Pfadi Butterfly Route Planner")
 
         layout = QVBoxLayout()
         self.import_button = QPushButton("Import GPX File")
