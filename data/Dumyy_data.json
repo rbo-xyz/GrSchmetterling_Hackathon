@@ -1,0 +1,35 @@
+[
+  {
+    "Segment id": 1,
+    "km": 5,
+    "hm": 100,
+    "von_pkt_name": "Station1",
+    "von_pkt_geom": "POINT(x,y)",
+    "bis_pkt_name": "Station2",
+    "bis_pkt_geom": "POINT(x,y)",
+    "segment_geom": "Line((x,y),(x,y),(x,y))",
+    "Leistung_km": 6
+  },
+  {
+    "Segment id": 2,
+    "km": 9,
+    "hm": 50,
+    "von_pkt_name": "Station2",
+    "von_pkt_geom": "POINT(x,y)",
+    "bis_pkt_name": "Station3",
+    "bis_pkt_geom": "POINT(x,y)",
+    "segment_geom": "Line((x,y),(x,y),(x,y))",
+    "Leistung_km": 9.5
+  },
+  {
+    "Segment id": 3,
+    "km": 2,
+    "hm": 27,
+    "von_pkt_name": "Station3",
+    "von_pkt_geom": "POINT(x,y)",
+    "bis_pkt_name": "Station4",
+    "bis_pkt_geom": "POINT(x,y)",
+    "segment_geom": "Line((x,y),(x,y),(x,y))",
+    "Leistung_km": 2.25
+  }
+]
