@@ -4,10 +4,10 @@ from reportlab.lib.utils import ImageReader
 import matplotlib.pyplot as plt
 import contextily as ctx
 
-def generate_elevation_plot(gdf):
+def generate_elevation_plot(df):
     fig, ax = plt.subplots(figsize=(6, 2))
-    ax.plot(gdf["cumulative_km"], gdf["elevation"], marker='o', color='green')
-    ax.fill_between(gdf["cumulative_km"], gdf["elevation"], color='yellow', alpha=0.5)
+    ax.plot(df["Distanz km"], df["Höhe m.ü.M."], marker='o', color='green')
+    ax.fill_between(df["Distanz km"], df["Höhe m.ü.M."], color='yellow', alpha=0.5)
     ax.set_xlabel("Distanz (km)")
     ax.set_ylabel("Höhe (m ü. M.)")
     ax.set_title("Höhenprofil – Pfadi Wanderung")
