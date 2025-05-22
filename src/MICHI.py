@@ -299,7 +299,7 @@ for i in range(1, len(data)):
     else:
         bemerkung_data.append("–")
 
-export_to_pdf(data)
+# export_to_pdf(data)
 
-pdf_path = "marschzeit-grid.pdf"
-os.startfile(pdf_path)
+# pdf_path = "marschzeit-grid.pdf"
+# os.startfile(pdf_path)
