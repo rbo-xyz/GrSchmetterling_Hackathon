@@ -2,14 +2,16 @@
 from src.calculate import calc_leistungskm
 from src.import_gpx import import_gpx
 from src.maps import generate_elevation_plot 
+#TODO: Import der Export Funktion
 
 #import Module
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox,QGraphicsScene
+from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox,QGraphicsScene,QTableWidget, QTableWidgetItem
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QPixmap
 import sys
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+import pandas as pd
 
 
 
@@ -57,6 +59,16 @@ class MarschzeitBerechnung(QWidget):
             print("Berechnung wurde ausgeführt")
             # self.gdf_calc.to_csv("test.csv")
 
+            #Darstellung des Dataframes im UI
+            self.tableWidget.setRowCount(len(self.gdf_calc))
+            self.tableWidget.setColumnCount(len(self.gdf_calc.columns))
+            self.tableWidget.setHorizontalHeaderLabels(self.gdf_calc.columns.tolist())
+
+            for row_idx in range(len(self.gdf_calc)):
+                for col_idx, col_name in enumerate(self.gdf_calc.columns):
+                    item = QTableWidgetItem(str(self.gdf_calc.iloc[row_idx, col_idx]))
+                    self.tableWidget.setItem(row_idx, col_idx, item)
+
             #Darstellung des Höhenprofils im UI
             self.fig = generate_elevation_plot(self.gdf_calc)
             self.graphicsViewProfil.setScene(QGraphicsScene())
@@ -70,7 +82,7 @@ class MarschzeitBerechnung(QWidget):
             # Ausgabe des Geodatframes für den Export
             return self.gdf_calc
 
-        # Hier kommt dein Code zum Laden von GPX-Dateien rein
+        
 
 
     def export_pdf(self):
@@ -78,7 +90,9 @@ class MarschzeitBerechnung(QWidget):
         self.filename_s, typ= QFileDialog.getSaveFileName(self, "Datei Speichern",
                                                    "",
                                                    "PDF (*.PDF)")
-        #TODO
+        #TODO 
+        export_to_pdf(self.gdf_calc, self.filename_s)
+        print("Export wurde ausgeführt")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
