@@ -56,7 +56,7 @@ class MarschzeitBerechnung(QWidget):
             print("Berechnung wurde ausgeführt")
             #Darstellung des Höhenprofils im UI
             #TODO
-            self.fig = #TODO
+            self.fig = generate_elevation_plot(self.gdf_calc)
             self.graphicsViewProfil.setScene(QGraphicsScene())
             canvas = FigureCanvas(self.fig)
             proxy = self.graphicsViewProfil.scene().addWidget(canvas)
