@@ -5,8 +5,9 @@ from src.import_gpx import import_gpx
 
 #import Module
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox,QGraphicsScene
 from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QPixmap
 import sys
 
 
@@ -58,6 +59,24 @@ class MarschzeitBerechnung(QWidget):
             return self.gdf_calc
 
         # Hier kommt dein Code zum Laden von GPX-Dateien rein
+
+
+    def hoehenprofil_darstellen(self, bild_pfad):
+    # Neue Scene erstellen (oder alte löschen)
+        scene = QGraphicsScene()
+
+    # Pixmap aus Bilddatei laden
+        pixmap = QPixmap(bild_pfad)
+
+    # Pixmap in die Scene einfügen
+        scene.addPixmap(pixmap)
+
+    # Scene in das graphicsView setzen
+        self.graphicsViewProfil.setScene(scene)
+
+    # Optional: Ansicht an Pixmapgröße anpassen
+        self.graphicsViewProfil.fitInView(scene.itemsBoundingRect(), mode=1)
+
 
     def export_pdf(self):
         print("PDF exportieren wurde gedrückt")
