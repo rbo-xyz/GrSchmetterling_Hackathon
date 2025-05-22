@@ -1,5 +1,6 @@
 #import Files für Berechnung
-# from src/calculate.py import *
+from src.calculate import calc_leistungskm
+from src.import_gpx import import_gpx
 
 #import Module
 from PyQt5 import uic
@@ -16,14 +17,13 @@ class MarschzeitBerechnung(QWidget):
         self.setWindowTitle("Marschzeitberechnung")
         self.setMinimumSize(1000, 800)
 
-        # Signal-Verbindungen aufbauen
-        # Beispiel: Button "GPX laden" heißt in deiner UI 'pushButtonLoad'
+        # Button Verbindungen
+        
         self.pushButtonLoad.clicked.connect(self.laden)
         self.pushButtonExportPDF.clicked.connect(self.export_pdf)
 
-        # Falls du ein QWebEngineView namens 'karte' hast, kannst du z.B. so darauf zugreifen:
-        # (Falls nicht vorhanden, muss Widget noch in der UI ergänzt werden)
-        # self.karte.load(QUrl('https://www.reddit.com/'))
+
+    #Funktionen für die Berechnung
 
     def laden(self):
         print("GPX laden wurde gedrückt")
