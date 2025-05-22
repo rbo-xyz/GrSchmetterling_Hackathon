@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MarschzeitBerechnung</class>
+ <widget class="QWidget" name="MarschzeitBerechnung">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1000</width>
+    <height>700</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Marschzeitberechnung</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Route und Datenimport</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_top">
+      <item>
+       <widget class="QLabel" name="labelRoute">
+        <property name="text">
+         <string>Route:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="lineEditRoute"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonLoad">
+        <property name="text">
+         <string>GPX/KML laden</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonExportPDF">
+        <property name="text">
+         <string>Als PDF exportieren</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="textVisible">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTableWidget" name="tableWidget">
+     <property name="rowCount">
+      <number>0</number>
+     </property>
+     <property name="columnCount">
+      <number>8</number>
+     </property>
+     <column>
+      <property name="text">
+       <string>Abschnitt</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Von</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Nach</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Laenge [km]</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Hoehenmeter [m]</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Leistungskm</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Marschzeit [min]</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Hinweis</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="labelSummary">
+     <property name="text">
+      <string>Gesamtsumme: Distanz: 0.0 km | Hoehenmeter: 0 m | Marschzeit: 0 min</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGraphicsView" name="graphicsViewProfil">
+     <property name="toolTip">
+      <string>Höhenprofil</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
