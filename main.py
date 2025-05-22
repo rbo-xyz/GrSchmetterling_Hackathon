@@ -1,6 +1,7 @@
 #import Files für Berechnung
 from src.calculate import calc_leistungskm
 from src.import_gpx import import_gpx
+# from src.results import 
 
 #import Module
 from PyQt5 import uic
@@ -27,28 +28,43 @@ class MarschzeitBerechnung(QWidget):
     #Funktionen für die Berechnung
 
     def laden(self):
+        #Laden der GPX Datei über einen FileDialog
         print("GPX laden wurde gedrückt")
-        self.filename, type = QFileDialog.getOpenFileName(self, "Datei öffnen",
+        self.filename_i, type = QFileDialog.getOpenFileName(self, "Datei öffnen",
                                                      "", 
                                                      "GPX-File (*.gpx)")
-        
+        #Abfüllen des Dateinamens in der UI
+        self.lineEditRoute.setText(self.filename_i)
+        return self.filename_i
 
-        # Fertig
 
     def calculate(self):
         print("calculate wurde gedrückt")
-        if self.filename is None:
+        #Kontrolle ob eine Datei geladen wurde
+        if not hasattr(self, 'filename_i') or not self.filename_i:
             QMessageBox.critical(self, "Fehler", "Bitte laden Sie zuerst eine GPX-Datei.")
+            return  # Berechnung abbrechen
         else:
-            self.gdf_imp = import_gpx(self.filename)
-            self.gdf_calc = calc_leistungskm(self.gdf_imp)
+            #import der GPS Datei über den Importer
+            self.gdf_imp = import_gpx(self.filename_i)
+            # Berechnung der Leistungskilometer, Marschzeit, Distanz und Höhenmeter
+            self.gdf_calc, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit = calc_leistungskm(self.gdf_imp)
+            #Darstellung des Höhenprofils im UI
+            #TODO
+
+            # Abfüllen der Summary im UI
+            self.labelSummary.setText(f"Gesamtsumme: Distanz: {self.tot_dist} km | Hoehenmeter: {self.tot_hm_pos} m und {self.tot_hm_neg} m | Marschzeit: {self.tot_marschzeit} min")
+            # Ausgabe des Geodatframes für den Export
+            return self.gdf_calc
 
         # Hier kommt dein Code zum Laden von GPX-Dateien rein
 
     def export_pdf(self):
         print("PDF exportieren wurde gedrückt")
-
-        # Hier kommt dein PDF-Exportcode rein
+        self.filename_s, typ= QFileDialog.getSaveFileName(self, "Datei Speichern",
+                                                   "",
+                                                   "PDF (*.PDF)")
+        #TODO
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

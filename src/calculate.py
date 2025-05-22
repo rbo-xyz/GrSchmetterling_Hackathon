@@ -34,4 +34,9 @@ def calc_leistungskm (gdf):
         gdf.at[idx, 'Leistungskm [km]'] = leistungskm
         gdf.at[idx, 'Marschzeit [min]'] = mz
 
-    return gdf
+        tot_dist = np.sum(km)
+        tot_hm_pos = np.sum(hm<0)
+        tot_hm_neg = np.sum(hm>0)
+        tot_marschzeit = np.sum(mz)
+
+    return gdf, tot_dist, tot_hm_pos, tot_hm_neg, tot_marschzeit
