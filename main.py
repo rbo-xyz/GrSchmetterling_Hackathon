@@ -59,6 +59,24 @@ class MarschzeitBerechnung(QWidget):
 
         # Hier kommt dein Code zum Laden von GPX-Dateien rein
 
+
+    def zeige_bild(self, bild_pfad):
+    # Neue Scene erstellen (oder alte löschen)
+        scene = QGraphicsScene()
+
+    # Pixmap aus Bilddatei laden
+        pixmap = QPixmap(bild_pfad)
+
+    # Pixmap in die Scene einfügen
+        scene.addPixmap(pixmap)
+
+    # Scene in das graphicsView setzen
+        self.graphicsViewProfil.setScene(scene)
+
+    # Optional: Ansicht an Pixmapgröße anpassen
+        self.graphicsViewProfil.fitInView(scene.itemsBoundingRect(), mode=1)
+
+
     def export_pdf(self):
         print("PDF exportieren wurde gedrückt")
         self.filename_s, typ= QFileDialog.getSaveFileName(self, "Datei Speichern",
