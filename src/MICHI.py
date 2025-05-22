@@ -5,6 +5,15 @@ from random import randint
 import os
 from PIL import Image
 from reportlab.lib.utils import ImageReader
+from itertools import islice
+
+def grouper(iterable, n):
+    it = iter(iterable)
+    while True:
+        chunk = list(islice(it, n))
+        if not chunk:
+            break
+        yield chunk
 
 def export_to_pdf(data):
     from reportlab.pdfgen import canvas
@@ -290,7 +299,7 @@ for i in range(1, len(data)):
     else:
         bemerkung_data.append("–")
 
-export_to_pdf(data)
+# export_to_pdf(data)
 
-pdf_path = "marschzeit-grid.pdf"
-os.startfile(pdf_path)
+# pdf_path = "marschzeit-grid.pdf"
+# os.startfile(pdf_path)
