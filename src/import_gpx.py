@@ -73,4 +73,5 @@ def import_app(filepath: str):
 
 
 
-def combine_
+def combine_waypoints_lines():
+    pass
