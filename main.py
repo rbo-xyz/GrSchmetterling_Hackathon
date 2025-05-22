@@ -4,22 +4,17 @@
 # from result import generate_report
 
 # import Module
-from PyQt5.QtWidgets import*
-from PyQt5.uic import *
-from PyQt5.QtWebEngineWidgets import *
-from PyQt5.QtCore import *
+from PyQt5 import uic
+from PyQt5.QtWidgets import QApplication, QWidget
+import sys
 
-class fenster(QMainWindow):
+class MarschzeitBerechnung(QWidget):
     def __init__(self):
         super().__init__()
-        loadUi('UI/possible_UI.ui', self)
+        uic.loadUi("possible_UI.ui", self)
 
-    
-
-
-app = QApplication ([])
-
-window = fenster()
-window.show()
-
-app.exec()
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MarschzeitBerechnung()
+    window.show()
+    sys.exit(app.exec_())
