@@ -5,6 +5,15 @@ from random import randint
 import os
 from PIL import Image
 from reportlab.lib.utils import ImageReader
+from itertools import islice
+
+def grouper(iterable, n):
+    it = iter(iterable)
+    while True:
+        chunk = list(islice(it, n))
+        if not chunk:
+            break
+        yield chunk
 
 def export_to_pdf(data):
     from reportlab.pdfgen import canvas
