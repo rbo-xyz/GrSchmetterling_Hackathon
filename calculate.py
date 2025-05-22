@@ -1,4 +1,7 @@
-def calculate_lkm(points):
+#import in die Funktion: Geodataframe sowie Marschgeschwindigkeit aus UI
+
+def calculate_lkm(points, marchTime):
+
     import math
 
     def flat_distance(lat1, lon1, lat2, lon2):
