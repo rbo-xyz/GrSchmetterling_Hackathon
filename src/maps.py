@@ -4,25 +4,24 @@ from reportlab.lib.utils import ImageReader
 import matplotlib.pyplot as plt
 import contextily as ctx
 
-def generate_elevation_plot(gdf, output_path):
-    plt.figure(figsize=(6, 2))
-    plt.plot(gdf["cumulative_km"], gdf["elevation"], marker='o', color='green')
-    plt.fill_between(gdf["cumulative_km"], gdf["elevation"], color='yellow', alpha=0.5)
-    plt.xlabel("Distanz (km)")
-    plt.ylabel("Höhe (m ü. M.)")
-    plt.title("Höhenprofil – Pfadi Wanderung")
-    plt.grid(True)
-    plt.tight_layout()
-    plt.savefig(output_path)
-    plt.close()
+def generate_elevation_plot(gdf):
+    fig, ax = plt.subplots(figsize=(6, 2))
+    ax.plot(gdf["cumulative_km"], gdf["elevation"], marker='o', color='green')
+    ax.fill_between(gdf["cumulative_km"], gdf["elevation"], color='yellow', alpha=0.5)
+    ax.set_xlabel("Distanz (km)")
+    ax.set_ylabel("Höhe (m ü. M.)")
+    ax.set_title("Höhenprofil – Pfadi Wanderung")
+    ax.grid(True)
+    fig.tight_layout()
+    return fig
 
-def generate_route_map(gdf, output_path):
-    ax = gdf.plot(figsize=(8, 5), column='Abschnittsname', legend=True, linewidth=3)
+def generate_route_map(gdf):
+    fig, ax = plt.subplots(figsize=(8, 5))
+    gdf.plot(ax=ax, column='Abschnittsname', legend=True, linewidth=3)
     ctx.add_basemap(ax, source=ctx.providers.OpenTopoMap)
-    plt.axis('off')
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=150)
-    plt.close()
+    ax.set_axis_off()
+    fig.tight_layout()
+    return fig
 
 def draw_scaled_image(c, img_path, x, y, max_width):
     img = Image.open(img_path)
