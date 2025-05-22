@@ -1,8 +1,13 @@
 import xml.etree.ElementTree as ET
 import os
+import requests
+import json
+
+import numpy as np
 
 import geopandas as gpd
-from shapely.geometry import Point, LineString
+from shapely.geometry import Point, LineString, MultiPoint, MultiLineString, mapping
+from shapely.ops import linemerge, split
 import gpxpy
 from pyproj import Transformer
 
@@ -30,7 +35,7 @@ def import_gpx(filepath: str):
     if source == "app":
         gdf = import_app(filepath)
     if source == "web":
-        pass
+        gdf = import_web(filepath)
     if source == "unknown":
         raise ValueError(f"Datei '{filepath}' ist weder von der Swisstopo-App noch vom Siwsstopo-GIS erstellt worden.")
 
@@ -105,6 +110,10 @@ def import_app(filepath: str):
         crs="EPSG:2056"   # LV95
     )
 
+    ## CRS neu setzen
+    gdf_waypoints = gdf_waypoints.set_crs(epsg=2056, allow_override=True)
+    gdf_lines = gdf_lines.set_crs(epsg=2056, allow_override=True)
+
     ## Konvertierung der Dataframe für die Ausgabe
     result = combine_waypoints_lines(gdf_lines, gdf_waypoints)
 
@@ -114,9 +123,58 @@ def import_app(filepath: str):
 ## <---------------------------------------------------------------------------------------------------------------->
 
 def import_web(filepath: str):
-    pass
+    ## Erstellung Waypoints GeoDataFrame
+    gdf_waypoints = gpd.read_file(filepath, layer="waypoints", driver="GPX")
+    gdf_waypoints['id'] = range(1, len(gdf_waypoints)+1)
+    gdf_waypoints = gdf_waypoints.set_crs(epsg=4326, allow_override=True).to_crs(epsg=2056)
+    gdf_waypoints["geometry"] = gdf_waypoints.geometry.apply(to_3d_Point)
+    gdf_waypoints = gdf_waypoints[["id","name", "geometry"]]
+
+    ## Erstellung des MultiLine Tracks GeoDataFrame
+    gdf_routes = gpd.read_file(filepath, layer="routes", driver="GPX")
+    gdf_routes = gdf_routes.set_crs(epsg=4326, allow_override=True).to_crs(epsg=2056)
+    gdf_routes = gdf_routes[["geometry"]]
+    mls = MultiLineString(gdf_routes.geometry.tolist())
+    merged  = linemerge(mls)
 
 
+    ## Aufteilen der Linie in Segmente gemäss den Waypoints
+    points = gdf_waypoints.geometry.to_list()
+    projected = [merged.interpolate(merged.project(pt)) for pt in points]
+    mp = MultiPoint(projected)
+    pieces = split(merged, mp)
+    segments = list(pieces.geoms)
+    gdf_lines = gpd.GeoDataFrame(
+        {'geometry': segments}
+    )
+    gdf_lines['id'] = range(1, len(gdf_lines)+1)
+
+    ## Weitere Stützpunkte den Linestrings hinzufügen
+    gdf_lines['geometry'] = gdf_lines.geometry.apply(lambda ln: densify(ln, interval=100.0))
+
+    ## Umdimensionierung der Segmente GeoDataFrame
+    gdf_lines = gdf_lines[["id", "geometry"]]
+
+    ## Diese Codestelle kann verwendet werden, wenn jeder Punkt eine Polyline bei der API abgefragt werden soll.
+    ## --> Nächster Abschnitt auskommentieren
+    # ## Erstellung 3D-LineStrings
+    # gdf_lines_3d = gdf_lines.copy()
+    # gdf_lines_3d["geometry"] = [to_3d_linestring(line) for line in gdf_lines.geometry]
+
+    ## Diese Codestelle kann verwendet werden, wenn der LineString bei der API abgefragt werden soll. --> schneller
+    ## --> letzter Abschnitt auskommentieren
+    ## Erstellung 3D-LineStrings via Profile-API (nur 1 Request pro Segment)
+    gdf_lines_3d = gdf_lines.copy()
+    gdf_lines_3d["geometry"] = gdf_lines.geometry.apply(lambda ln: to_3d_linestring_profile(ln))
+
+    ## CRS neu setzen
+    gdf_waypoints = gdf_waypoints.set_crs(epsg=2056, allow_override=True)
+    gdf_lines_3d = gdf_lines_3d.set_crs(epsg=2056, allow_override=True)
+
+    ## Konvertierung der Dataframe für die Ausgabe
+    result = combine_waypoints_lines(gdf_lines_3d, gdf_waypoints)
+
+    return result
 
 ## <---------------------------------------------------------------------------------------------------------------->
 ## <---------------------------------------------------------------------------------------------------------------->
@@ -180,9 +238,117 @@ def combine_waypoints_lines(gdf_lines: gpd.GeoDataFrame,
         "segment_geom"
     ]]
 
-    out["segment_id"]     = out["segment_id"].astype("Int32")
-    out["von_pkt_name"]   = out["von_pkt_name"].astype(str)
-    out["bis_pkt_name"]   = out["bis_pkt_name"].astype(str)
+    ## Sortierung Kontrolieren
+    # Herausfinden von Start und Endpunkt
+    all_vons = set(out['von_pkt_name'])
+    all_bis  = set(out['bis_pkt_name'])
+    start = (all_vons - all_bis).pop()
+    end   = (all_bis  - all_vons).pop()
+    # Lookup Dictionary aufbauen
+    von_index = {row.von_pkt_name: idx for idx, row in out.iterrows()}
+    # Topologie-Reihenfolge herstellen
+    ordered_idx = []
+    current = start
+    while current in von_index:
+        idx = von_index[current]
+        ordered_idx.append(idx)
+        current = out.at[idx, 'bis_pkt_name']
+    # neu sortieren
+    gdf_sorted = out.loc[ordered_idx].reset_index(drop=True)
+    gdf_sorted['segment_id'] = gdf_sorted.index + 1
+    gdf_sorted = gdf_sorted.set_geometry('segment_geom')
 
-    return gpd.GeoDataFrame(out, geometry="segment_geom", crs=gdf.crs)
+    ## DType anpassen
+    gdf_sorted["segment_id"]     = gdf_sorted["segment_id"].astype("int16")
+    gdf_sorted["von_pkt_name"]   = gdf_sorted["von_pkt_name"].astype(str)
+    gdf_sorted["bis_pkt_name"]   = gdf_sorted["bis_pkt_name"].astype(str)
 
+    return gpd.GeoDataFrame(gdf_sorted, geometry="segment_geom", crs=gdf.crs)
+
+## <---------------------------------------------------------------------------------------------------------------->
+## <---------------------------------------------------------------------------------------------------------------->
+
+def to_3d_Point(pt: Point):
+    z = get_height(pt.x, pt.y)
+    return Point(pt.x, pt.y, z) 
+
+## <---------------------------------------------------------------------------------------------------------------->
+## <---------------------------------------------------------------------------------------------------------------->
+
+def get_height(easting: float, 
+               northing: float, 
+               max_retries: int = 3):
+    """
+    Fragt die Höhe für einen Punkt (in LV95) bei der Swisstopo-API ab
+    und gibt sie als float zurück.
+    """
+    HEIGHT_URL = "https://api3.geo.admin.ch/rest/services/height"
+    params = {"easting": easting, "northing": northing}
+    for attempt in range(max_retries):
+        r = requests.get(HEIGHT_URL, params=params, timeout=5)
+        if r.status_code == 200:
+            return r.json()["height"]
+    r.raise_for_status()
+
+## <---------------------------------------------------------------------------------------------------------------->
+## <---------------------------------------------------------------------------------------------------------------->
+
+def densify(linestring: LineString, 
+            interval: float = 100.0):
+    
+    total_len = linestring.length
+    orig_dists = [linestring.project(Point(x, y)) for x, y in linestring.coords]
+    regular_dists = list(np.arange(0, total_len, interval))
+    regular_dists.append(total_len)
+    all_dists = sorted(set(orig_dists + regular_dists))
+    pts = [linestring.interpolate(d) for d in all_dists]
+
+    return LineString([(p.x, p.y) for p in pts])
+
+## <---------------------------------------------------------------------------------------------------------------->
+## <---------------------------------------------------------------------------------------------------------------->
+
+def to_3d_linestring(line2d: LineString):
+
+    coords2d = list(line2d.coords)
+    coords3d = []
+    for x, y in coords2d:
+        z = get_height(x, y)
+        coords3d.append((x, y, z))
+
+    return LineString(coords3d)
+
+## <---------------------------------------------------------------------------------------------------------------->
+## <---------------------------------------------------------------------------------------------------------------->
+
+def to_3d_linestring_profile(line2d: LineString,
+                             crs: int = 2056,
+                             nb_points: int = 42,
+                             offset: int | None = None,
+                             distinct_points: bool = True,
+                             which: str = "COMB"):
+
+    nb_points = len(line2d.coords)
+    geom_geojson = mapping(line2d)
+
+    url = "https://api3.geo.admin.ch/rest/services/profile.json"
+    params: dict[str, str] = {
+        "geom": json.dumps(geom_geojson),
+        "sr": str(crs),
+        "nb_points": str(nb_points),
+        "distinct_points": str(distinct_points).lower(),
+    }
+    if offset is not None:
+        params["offset"] = str(offset)
+
+    r = requests.get(url, params=params, timeout=10)
+    r.raise_for_status()
+
+    profile = r.json()
+
+    coords3d = [
+        (pt["easting"], pt["northing"], pt["alts"][which])
+        for pt in profile
+    ]
+
+    return LineString(coords3d)
