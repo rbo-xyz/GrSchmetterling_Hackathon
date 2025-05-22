@@ -1,41 +1,41 @@
-# import andere Dateien
-# from import_gpx import parse_gpx
-# from calculate import calculate_lkm
-# from result import generate_report
+#import Files für Berechnung
+# from src/calculate.py import *
 
-# import Module
+#import Module
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QTableWidget
+from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtCore import QUrl
+from PyQt5.QtWebEngineWidgets import QWebEngineView  # Falls du die Karte einbinden willst
 import sys
 
 class MarschzeitBerechnung(QWidget):
     def __init__(self):
         super().__init__()
-        uic.loadUi("possible_UI.ui", self)
+        uic.loadUi("possible_UI.ui", self)  # UI laden
 
-        # Connect buttons to dummy functions
-        self.pushButtonLoad: QPushButton = self.findChild(QPushButton, "pushButtonLoad")
-        self.pushButtonLoad.clicked.connect(self.load_gpx_dummy)
+        self.setWindowTitle("Marschzeitberechnung")
+        self.setMinimumSize(1000, 800)
 
-        self.pushButtonExportPDF: QPushButton = self.findChild(QPushButton, "pushButtonExportPDF")
-        self.pushButtonExportPDF.clicked.connect(self.export_pdf_dummy)
+        # Signal-Verbindungen aufbauen
+        # Beispiel: Button "GPX laden" heißt in deiner UI 'pushButtonLoad'
+        self.pushButtonLoad.clicked.connect(self.laden)
+        self.pushButtonExportPDF.clicked.connect(self.export_pdf)
 
-        # Connect table interaction to dummy function
-        self.tableWidget: QTableWidget = self.findChild(QTableWidget, "tableWidget")
-        self.tableWidget.cellClicked.connect(self.table_cell_clicked_dummy)
+        # Falls du ein QWebEngineView namens 'karte' hast, kannst du z.B. so darauf zugreifen:
+        # (Falls nicht vorhanden, muss Widget noch in der UI ergänzt werden)
+        # self.karte.load(QUrl('https://www.reddit.com/'))
 
-    def load_gpx_dummy(self):
-        print("🗺️ GPX/KML laden clicked — dummy function")
+    def laden(self):
+        print("GPX laden wurde gedrückt")
 
-    def export_pdf_dummy(self):
-        print("📝 Export PDF clicked — dummy function")
+        # Hier kommt dein Code zum Laden von GPX-Dateien rein
 
-    def table_cell_clicked_dummy(self, row, column):
-        print(f"📋 Table cell clicked at (row={row}, column={column}) — dummy function")
-
+    def export_pdf(self):
+        print("PDF exportieren wurde gedrückt")
+        # Hier kommt dein PDF-Exportcode rein
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = MarschzeitBerechnung()
-    window.show()
+    fenster = MarschzeitBerechnung()
+    fenster.show()
     sys.exit(app.exec_())
