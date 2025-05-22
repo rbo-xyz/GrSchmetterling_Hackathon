@@ -68,6 +68,7 @@ class MarschzeitBerechnung(QWidget):
                 for col_idx, col_name in enumerate(self.gdf_calc.columns):
                     item = QTableWidgetItem(str(self.gdf_calc.iloc[row_idx, col_idx]))
                     self.tableWidget.setItem(row_idx, col_idx, item)
+            print("Dataframe wurde dargestellt")
 
             #Darstellung des Höhenprofils im UI
             self.fig = generate_elevation_plot(self.gdf_calc)
@@ -75,7 +76,7 @@ class MarschzeitBerechnung(QWidget):
             canvas = FigureCanvas(self.fig)
             proxy = self.graphicsViewProfil.scene().addWidget(canvas)
             print("Höhenprofil wurde dargestellt")
-            print(self.gdf_calc)
+            
 
             # Abfüllen der Summary im UI
             self.labelSummary.setText(f"Gesamtsumme: Distanz: {self.tot_dist} km | Hoehenmeter: {self.tot_hm_pos} m und {self.tot_hm_neg} m | Marschzeit: {self.tot_marschzeit_h}:{self.tot_marschzeit_h} h")
