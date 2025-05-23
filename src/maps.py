@@ -7,91 +7,33 @@ import contextily as ctx
 from shapely.geometry import LineString
 import numpy as np
 
-from shapely.geometry import LineString
-from shapely import wkt
-import matplotlib.pyplot as plt
-import numpy as np
-
 def generate_elevation_plot(df):
-    fig, ax = plt.subplots(figsize=(10, 3))
+    fig, ax = plt.subplots(figsize=(6, 2))
 
     dists = []
     elevations = []
-    labels = []
-    label_positions = []
-
     total_dist = 0.0
-    started = False
 
-    for idx, row in df.iterrows():
-        # Use 'segment_geom' if available, otherwise fallback to 'geometry'
-        geom_input = row.get('segment_geom', row.get('geometry'))
-
-        # Convert WKT string to geometry if needed
-        if isinstance(geom_input, str):
-            geom = wkt.loads(geom_input)
-        else:
-            geom = geom_input
-
+    for geom in df.geometry:
         if not isinstance(geom, LineString):
             continue
-
         coords = list(geom.coords)
-        segment_start_dist = total_dist
-
-        for i in range(len(coords)):
+        for i in range(1, len(coords)):
+            prev = coords[i - 1]
             curr = coords[i]
-            if not started:
-                elev = curr[2] if len(curr) == 3 else 0
-                dists.append(0.0)
-                elevations.append(elev)
-                prev = curr
-                started = True
-                continue
-
-            dx = np.linalg.norm(np.array(curr[:2]) - np.array(prev[:2])) / 1000.0
+            dx = np.sqrt((curr[0] - prev[0])**2 + (curr[1] - prev[1])**2) / 1000.0  # assuming coords in meters (e.g., EPSG:2056)
             total_dist += dx
             elev = curr[2] if len(curr) == 3 else 0
             dists.append(total_dist)
             elevations.append(elev)
-            prev = curr
 
-        start_elev = coords[0][2] if len(coords[0]) == 3 else 0
-        labels.append((segment_start_dist, start_elev, row.get('von_pkt_name', '')))
-        label_positions.append((segment_start_dist, start_elev))
-
-        last_coords = coords
-
-    end_elev = last_coords[-1][2] if len(last_coords[-1]) == 3 else 0
-    labels.append((total_dist, end_elev, row.get('bis_pkt_name', '')))
-    label_positions.append((total_dist, end_elev))
-
-    ax.plot(dists, elevations, color='green')
+    ax.plot(dists, elevations, marker='o', color='green')
     ax.fill_between(dists, elevations, color='yellow', alpha=0.5)
-
-    label_xs, label_ys = zip(*label_positions)
-    ax.scatter(label_xs, label_ys, color='green', s=30, zorder=5)
-
     ax.set_xlabel("Distanz (km)")
     ax.set_ylabel("Höhe (m ü. M.)")
     ax.set_title("Höhenprofil")
-
-    max_elev = max(elevations)
-    ax.set_ylim(top=max_elev + 700)
-    fig.subplots_adjust(top=0.8)
-
-    for dist, elev, label in labels:
-        ax.text(
-            dist, elev + 60, label,
-            ha='left',
-            va='center',
-            fontsize=9,
-            rotation=90,
-            rotation_mode='anchor',
-            clip_on=False
-        )
-
     ax.grid(True)
+    fig.tight_layout()
     return fig
 
 
