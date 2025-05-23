@@ -25,19 +25,19 @@ git clone https://github.com/rbo-xyz/GrSchmetterling_Hackathon.git
 
 ### Git Projekt mit Visual Studio Code lokal klonen
 Öffne ein neues Visual Studio Code Fenster und wähle unter Start *Clone Git Repository*. Alternativ öffne die Command Palette in VS Code `CTRL+Shift+P` (*View / Command Palette*) und wähle `Git: clone`. 
-Füge die Git web URL `https://github.com/TickettoEscape/4230_TickettoEscape.git` ein und bestätige die Eingabe mit Enter. Wähle einen Ordner in welchen das Repository *geklont* werden soll.
+Füge die Git web URL `https://github.com/rbo-xyz/GrSchmetterling_Hackathon.git` ein und bestätige die Eingabe mit Enter. Wähle einen Ordner in welchen das Repository *geklont* werden soll.
 
 ## installieren
 Öffne ein Terminal und wechsle in den *preprocessing* Ordner.
-1. Virtuelle Umgebung für Python mit allen Requirements mit der `myname.yml` automatisch oder mit  `requirements.txt` manuell aufsetzen.
+1. Virtuelle Umgebung für Python mit allen Requirements mit der `requirements.yml` automatisch oder mit  `requirements.txt` manuell aufsetzen.
 
 ```shell
 # go to YML-File
 cd preprocessing
 # Füge conda-forge den als Channel in conda hinzu, da sonst nicht alle Pakete installiert werden können.
-conda env create -f myname.yml
+conda env create -f requirements.yml
 # Env aktivieren.
-conda activate Ticket_to_Escape
+conda activate <myname>
 
 
 ## API Dokumentation
