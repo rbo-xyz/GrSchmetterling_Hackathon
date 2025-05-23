@@ -78,5 +78,5 @@ anschliessend kann auf den **berechnen** Knopf gedrückt werden. Sobald dies dur
 <br/>
 
 
-Beste Grüsse Gruppe Schmetterling
+Beste Grüsse Gruppe Schmetterling<br/>
 Alexander Rühli, Ignaz Kuczynski, Manuel Aebi, Michael Kamm, Raffaele Boppart
