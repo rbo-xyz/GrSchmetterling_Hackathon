@@ -1,3 +1,6 @@
+#um den Designer zu laden
+# "C:\Users\"user"\anaconda3\envs\"envname"\Library\bin\Designer6.exe"
+
 #import Files für Berechnung
 from src.calculate import calc_leistungskm
 from src.import_gpx import import_gpx
@@ -45,6 +48,9 @@ class MarschzeitBerechnung(QWidget):
 
     def calculate(self):
         print("calculate wurde gedrückt")
+        #progressbar Value auf 0 setzen
+        self.progressBar.setValue(0)
+
         #Kontrolle ob eine Datei geladen wurde
         if not hasattr(self, 'filename_i') or not self.filename_i:
             QMessageBox.critical(self, "Fehler", "Bitte laden Sie zuerst eine GPX-Datei.")
@@ -54,10 +60,16 @@ class MarschzeitBerechnung(QWidget):
             self.gdf_imp = import_gpx(self.filename_i)
             print("Import wurde ausgeführt")
 
+            #progressbar Value auf 50% setzen
+            self.progressBar.setValue(50)
+
             # Berechnung der Leistungskilometer, Marschzeit, Distanz und Höhenmeter
             self.gdf_calc, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min = calc_leistungskm(self.gdf_imp)
             print("Berechnung wurde ausgeführt")
-            # self.gdf_calc.to_csv("test.csv")
+
+            #progressbar Value auf 75% setzen
+            self.progressBar.setValue(75)
+            
 
             #Darstellung des Dataframes im UI
             self.tableWidget.setRowCount(len(self.gdf_calc))
@@ -70,17 +82,27 @@ class MarschzeitBerechnung(QWidget):
                     self.tableWidget.setItem(row_idx, col_idx, item)
             print("Dataframe wurde dargestellt")
 
+            #progressbar Value auf 85% setzen
+            self.progressBar.setValue(85)
+
             #Darstellung des Höhenprofils im UI
             self.fig = generate_elevation_plot(self.gdf_calc)
             self.graphicsViewProfil.setScene(QGraphicsScene())
             canvas = FigureCanvas(self.fig)
             proxy = self.graphicsViewProfil.scene().addWidget(canvas)
             print("Höhenprofil wurde dargestellt")
+
+            #progressbar Value auf 95% setzen
+            self.progressBar.setValue(95)
             
 
             # Abfüllen der Summary im UI
             self.labelSummary.setText(f"Gesamtsumme: Distanz: {self.tot_dist} km | Hoehenmeter: {self.tot_hm_pos} m und {self.tot_hm_neg} m | Marschzeit: {self.tot_marschzeit_h}:{self.tot_marschzeit_h} h")
             # Ausgabe des Geodatframes für den Export
+
+            #progressbar Value auf 100% setzen
+            self.progressBar.setValue(100)
+
             return self.gdf_calc
 
         
