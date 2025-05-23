@@ -6,7 +6,7 @@ from src.calculate import calc_leistungskm
 from src.import_gpx import import_gpx
 from src.maps import generate_elevation_plot 
 from src.MICHI import export_to_pdf
-# from src.gdf_show import show
+from src.gdf_show import show
 
 #import Module
 from PyQt5 import uic
@@ -85,12 +85,14 @@ class MarschzeitBerechnung(QWidget):
             # Berechnung der Leistungskilometer, Marschzeit, Distanz und Höhenmeter
             self.gdf_calc, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min = calc_leistungskm(self.gdf_imp, self.input_geschwindigkeit)
             print("Berechnung wurde ausgeführt")
+            self.gdf_calc.to_csv("test_2.csv")
+
 
             #progressbar Value auf 75% setzen
             self.progressBar.setValue(75)
             
 
-            #Darstellung des Dataframes im UI
+            #Darstellung des Dataframes (als Tabelle) im UI
             self.gdf_show = show(self.gdf_calc)
             self.tableWidget.setRowCount(len(self.gdf_show))
             self.tableWidget.setColumnCount(len(self.gdf_show.columns))
