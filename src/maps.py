@@ -7,6 +7,20 @@ import contextily as ctx
 from shapely.geometry import LineString
 import numpy as np
 from shapely import wkt
+
+import geopandas as gpd
+from shapely import wkt
+from shapely.geometry import Point
+import matplotlib.pyplot as plt
+import matplotlib.colors as colors
+import matplotlib.collections as mc
+import contextily as ctx
+import pandas as pd
+import numpy as np
+
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
+
 def generate_elevation_plot(df):
     fig, ax = plt.subplots(figsize=(10, 3))
 
@@ -123,13 +137,75 @@ def generate_elevation_plot(df):
     return fig
 
 
-def generate_route_map(gdf):
-    fig, ax = plt.subplots(figsize=(8, 5))
-    gdf.plot(ax=ax, column='Abschnittsname', legend=True, linewidth=3)
-    ctx.add_basemap(ax, source=ctx.providers.OpenTopoMap)
-    ax.set_axis_off()
-    fig.tight_layout()
-    return fig
+def generate_route_map(df):
+    df['geometry'] = df['segment_geom'].apply(wkt.loads)
+    gdf = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:2056")
+
+    start_points = gdf.copy()
+    start_points['geometry'] = start_points['geometry'].apply(lambda line: Point(line.coords[0]))
+    start_points = start_points[['von_pkt_name', 'geometry']].rename(columns={'von_pkt_name': 'name'})
+
+    end_points = gdf.copy()
+    end_points['geometry'] = end_points['geometry'].apply(lambda line: Point(line.coords[-1]))
+    end_points = end_points[['bis_pkt_name', 'geometry']].rename(columns={'bis_pkt_name': 'name'})
+
+    points = pd.concat([start_points, end_points], ignore_index=True).drop_duplicates()
+    points = gpd.GeoDataFrame(points, geometry='geometry', crs="EPSG:2056")
+
+    gdf = gdf.to_crs(epsg=3857)
+    points = points.to_crs(epsg=3857)
+
+    fig, ax = plt.subplots(figsize=(10, 7))
+
+    segments = []
+    gradients = []
+
+    for line in gdf.geometry:
+        coords = list(line.coords)
+        for i in range(len(coords) - 1):
+            p1, p2 = coords[i], coords[i + 1]
+            dx = np.hypot(p2[0] - p1[0], p2[1] - p1[1])
+            dz = p2[2] - p1[2] if len(p1) == 3 and len(p2) == 3 else 0
+            gradient = (dz / dx) * 100 if dx != 0 else 0
+
+            segments.append([(p1[0], p1[1]), (p2[0], p2[1])])
+            gradients.append(gradient)
+
+    norm = colors.Normalize(vmin=min(gradients), vmax=max(gradients))
+    cmap = plt.cm.Reds
+    lc = mc.LineCollection(segments, cmap=cmap, norm=norm, linewidths=3)
+    lc.set_array(np.array(gradients))
+    ax.add_collection(lc)
+
+    points.plot(ax=ax, color='skyblue', markersize=25, zorder=5)
+
+    for _, row in points.iterrows():
+        ax.annotate(row['name'], xy=(row.geometry.x, row.geometry.y),
+                    xytext=(3, 3), textcoords='offset points', fontsize=8)
+
+    try:
+        ctx.add_basemap(ax, source=ctx.providers.OpenTopoMap, zoom=14, alpha=0.6)
+    except Exception as e:
+        print("Basemap konnte nicht hinzugefügt werden:", e)
+
+    # ⛔ Achsenbeschriftung (links/unten) deaktivieren
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+
+    # ✅ Gridlines im 1 km-Raster
+    xlim = ax.get_xlim()
+    ylim = ax.get_ylim()
+
+    x_ticks = np.arange(int(xlim[0] // 1000) * 1000, int(xlim[1] // 1000 + 1) * 1000, 1000)
+    y_ticks = np.arange(int(ylim[0] // 1000) * 1000, int(ylim[1] // 1000 + 1) * 1000, 1000)
+
+    ax.set_xticks(x_ticks)
+    ax.set_yticks(y_ticks)
+    ax.grid(True, color='gray', linestyle=':', linewidth=0.5)
+
+    ax.tick_params(left=False, bottom=False, labelleft=False, labelbottom=False)
+
+    return fig 
 
 def draw_scaled_image(c, img_path, x, y, max_width):
     img = Image.open(img_path)
