@@ -27,6 +27,7 @@ class MarschzeitBerechnung(QWidget):
         self.setWindowIcon(QIcon("icons/logo.png"))
         self.setWindowTitle("Marschzeitberechnung")
         self.setMinimumSize(1000, 800)
+        self.resize(1800, 1200)
         self.dateEditDatum.setDate(QDate.currentDate())
 
         # Button Verbindungen
@@ -85,7 +86,7 @@ class MarschzeitBerechnung(QWidget):
 
 
             # Berechnung der Leistungskilometer, Marschzeit, Distanz und Höhenmeter
-            self.gdf_calc, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min = calc_leistungskm(self.gdf_imp, self.input_geschwindigkeit)
+            self.gdf_calc, self.tot_dist, self.tot_lkm, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min = calc_leistungskm(self.gdf_imp, self.input_geschwindigkeit)
             print("Berechnung wurde ausgeführt")
             # self.gdf_calc.to_csv("test_2.csv")
 
@@ -121,7 +122,7 @@ class MarschzeitBerechnung(QWidget):
             
 
             # Abfüllen der Summary im UI
-            self.labelSummary.setText(f"Gesamtsumme: Distanz: {self.tot_dist} km | Hoehenmeter: {self.tot_hm_pos} m und {self.tot_hm_neg} m | Marschzeit: {self.tot_marschzeit_h}:{self.tot_marschzeit_h} h")
+            self.labelSummary.setText(f"Gesamtsumme: Distanz: {self.tot_dist} km bzw. {self.tot_lkm} lkm | Hoehenmeter: {self.tot_hm_pos} m und {self.tot_hm_neg} m | Marschzeit: {self.tot_marschzeit_h}:{self.tot_marschzeit_h} h")
             # Ausgabe des Geodatframes für den Export
 
             #progressbar Value auf 100% setzen
