@@ -23,11 +23,7 @@ def import_gpx(filepath: str):
     if not os.path.isfile(filepath):
         raise FileNotFoundError(f"Datei '{filepath}' wurde nicht gefunden.")
 
-    ## Filepath ist lesbar
-    try:
-        ET.parse(filepath)
-    except ET.ParseError as e:
-        raise ValueError(f"Datei '{filepath}' ist kein gültiges XML/GPX: {e}")
+    
 
     ## Check Source
     source = identify_source(filepath)
