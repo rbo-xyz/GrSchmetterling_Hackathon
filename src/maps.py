@@ -136,7 +136,14 @@ def generate_elevation_plot(df):
     ax.set_xlim(0, total_dist)
 
     ax.grid(True)
-    return fig
+    path ="C://temp_schmetterling"
+    if not os.path.exists(path):
+            os.mkdir(path)
+
+    path_file = os.path.join(path, "elevation.png")
+
+    fig.savefig(path_file, bbox_inches='tight')
+    plt.close(fig)
 
 
 def generate_route_map(df):
@@ -212,9 +219,9 @@ def generate_route_map(df):
     if not os.path.exists(path):
             os.mkdir(path)
 
-    path_file = os.path.join(path, "img.png")
+    path_file = os.path.join(path, "map.png")
 
-    fig.savefig(path_file, dpi=dpi, bbox_inches='tight')
+    fig.savefig(path_file, bbox_inches='tight')
     plt.close(fig)
 
 def draw_scaled_image(c, img_path, x, y, max_width):
