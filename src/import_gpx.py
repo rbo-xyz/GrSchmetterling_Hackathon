@@ -7,7 +7,7 @@ import numpy as np
 
 import geopandas as gpd
 from shapely.geometry import Point, LineString, MultiPoint, MultiLineString, mapping
-from shapely.ops import linemerge, split
+from shapely.ops import linemerge, split, substring
 import gpxpy
 from pyproj import Transformer
 
@@ -138,16 +138,36 @@ def import_web(filepath: str):
     merged  = linemerge(mls)
 
 
-    ## Aufteilen der Linie in Segmente gemäss den Waypoints
+    ## Aufteilen der Linie in Segmente gemäss den Waypoints v1 (veraltet da split Toleranz nicht erreicht)
+    # points = gdf_waypoints.geometry.to_list()
+    # projected = [merged.interpolate(merged.project(pt)) for pt in points]
+    # mp = MultiPoint(projected)
+    # pieces = split(merged, mp)
+    # segments = list(pieces.geoms)
+    # gdf_lines = gpd.GeoDataFrame(
+    #     {'geometry': segments}
+    # )
+    # gdf_lines['id'] = range(1, len(gdf_lines)+1)
+
+    ## Aufteilen der Linie in Segmente gemäss den Waypoints v2
+    # Punkte projezieren
     points = gdf_waypoints.geometry.to_list()
-    projected = [merged.interpolate(merged.project(pt)) for pt in points]
-    mp = MultiPoint(projected)
-    pieces = split(merged, mp)
-    segments = list(pieces.geoms)
+    # Distanzen entlang der Linie zu den Waypoints
+    dists = sorted(merged.project(pt) for pt in points)
+    # Segmente der Linie zwischen den Waypoints
+    segments = [
+        substring(merged, dists[i], dists[i+1])
+        for i in range(len(dists) - 1)
+        if dists[i+1] > dists[i]  # nur echte Stücke
+    ]
+    # Erstellung GeoDataFrame
     gdf_lines = gpd.GeoDataFrame(
-        {'geometry': segments}
+        {
+            'id':       range(1, len(segments) + 1),
+            'geometry': segments
+        },
+        crs=gdf_routes.crs
     )
-    gdf_lines['id'] = range(1, len(gdf_lines)+1)
 
     ## Weitere Stützpunkte den Linestrings hinzufügen
     gdf_lines['geometry'] = gdf_lines.geometry.apply(lambda ln: densify(ln, interval=100.0))
