@@ -10,11 +10,12 @@ from src.gdf_show import show
 
 #import Module
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox,QGraphicsScene,QTableWidget, QTableWidgetItem 
-from PyQt5.QtCore import QUrl
+from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox,QGraphicsScene,QTableWidget, QTableWidgetItem, QBoxLayout, QVBoxLayout
+from PyQt5.QtCore import QUrl, QDate
 from PyQt5.QtGui import QPixmap, QIcon
 import sys
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
+from matplotlib.figure import Figure
 import pandas as pd
 
 
@@ -22,11 +23,22 @@ import pandas as pd
 class MarschzeitBerechnung(QWidget):
     def __init__(self):
         super().__init__()
-        uic.loadUi("possible_UI_2.ui", self)  # UI laden
+        uic.loadUi("src/UserInterface_2.ui", self)  # UI laden
 
         self.setWindowIcon(QIcon("icons/logo.png"))
         self.setWindowTitle("Marschzeitberechnung")
         self.setMinimumSize(1000, 800)
+        self.resize(1800, 1200)
+        self.dateEditDatum.setDate(QDate.currentDate())
+
+        #Matplotlib Figur initialisieren
+        self.fig = None
+
+        if self.groupBoxHoehenprofil.layout() is None:
+            self.groupBoxHoehenprofil.setLayout(QVBoxLayout())
+        self.groupBoxHoehenprofil.setMinimumHeight(500)
+
+
 
         # Button Verbindungen
         
@@ -34,7 +46,7 @@ class MarschzeitBerechnung(QWidget):
         self.pushButtonCalculate.clicked.connect(self.calculate)
         self.pushButtonExportPDF.clicked.connect(self.export_pdf)
 
-        #Line Edits
+        
         
         
 
@@ -70,11 +82,11 @@ class MarschzeitBerechnung(QWidget):
             #progressbar Value auf 50% setzen
             self.progressBar.setValue(50)
 
+
             # Zugriff auf die Meta-Informationen aus dem UI (hier eingesetzt, da die Variablen abgefüllt sein müssen!)
             self.input_titel = self.lineEditTitel.text().strip()
-            
+            #Abrage ob Geschwindikeit eingegeben wurde um Programmabsturz zu vermeiden
             try:
-                #Abrage ob Geschwindikeit eingegeben wurde um Programmabsturz zu vermeiden
                 self.input_geschwindigkeit = float(self.lineEditSpeed.text().strip())
             except ValueError:
                 QMessageBox.critical(self, "Ungültige Eingabe", "Bitte eine gültige Geschwindigkeit in km/h eingeben.")
@@ -82,10 +94,11 @@ class MarschzeitBerechnung(QWidget):
             self.input_ersteller = self.lineEditErsteller.text().strip()
             self.input_erstellerdatum = self.dateEditDatum.date().toString("dd.MM.yyyy")
 
+
             # Berechnung der Leistungskilometer, Marschzeit, Distanz und Höhenmeter
-            self.gdf_calc, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min = calc_leistungskm(self.gdf_imp, self.input_geschwindigkeit)
+            self.gdf_calc, self.tot_dist, self.tot_lkm, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min = calc_leistungskm(self.gdf_imp, self.input_geschwindigkeit)
             print("Berechnung wurde ausgeführt")
-            self.gdf_calc.to_csv("test_2.csv")
+            # self.gdf_calc.to_csv("test_2.csv")
 
 
             #progressbar Value auf 75% setzen
@@ -107,19 +120,32 @@ class MarschzeitBerechnung(QWidget):
             #progressbar Value auf 85% setzen
             self.progressBar.setValue(85)
 
-            #Darstellung des Höhenprofils im UI
+            #Darstellung des Höhenprofils (interaktiv) im UI
             self.fig = generate_elevation_plot(self.gdf_calc)
-            self.graphicsViewProfil.setScene(QGraphicsScene())
-            canvas = FigureCanvas(self.fig)
-            proxy = self.graphicsViewProfil.scene().addWidget(canvas)
-            print("Höhenprofil wurde dargestellt")
+            print(type(self.fig))
+
+            layout = self.groupBoxHoehenprofil.layout()
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget is not None:
+                    widget.deleteLater()
+            
+            self.canvas = FigureCanvas(self.fig)
+            layout.addWidget(self.canvas)
+
+            self.toolbar = NavigationToolbar(self.canvas, self)
+            layout.addWidget(self.toolbar)
+            self.canvas.draw()
+            
+
 
             #progressbar Value auf 95% setzen
             self.progressBar.setValue(95)
             
 
             # Abfüllen der Summary im UI
-            self.labelSummary.setText(f"Gesamtsumme: Distanz: {self.tot_dist} km | Hoehenmeter: {self.tot_hm_pos} m und {self.tot_hm_neg} m | Marschzeit: {self.tot_marschzeit_h}:{self.tot_marschzeit_h} h")
+            self.labelSummary.setText(f"Gesamtsumme: Distanz: {self.tot_dist} km bzw. {self.tot_lkm} lkm | Hoehenmeter: {self.tot_hm_pos} m und {self.tot_hm_neg} m | Marschzeit: {self.tot_marschzeit_h}:{self.tot_marschzeit_min} h")
             # Ausgabe des Geodatframes für den Export
 
             #progressbar Value auf 100% setzen
