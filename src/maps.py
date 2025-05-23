@@ -3,37 +3,94 @@ from PIL import Image
 from reportlab.lib.utils import ImageReader
 import matplotlib.pyplot as plt
 import contextily as ctx
-
+from shapely import wkt
 from shapely.geometry import LineString
 import numpy as np
 
 def generate_elevation_plot(df):
-    fig, ax = plt.subplots(figsize=(6, 2))
+    fig, ax = plt.subplots(figsize=(10, 3))
 
     dists = []
     elevations = []
-    total_dist = 0.0
+    labels = []
+    label_positions = []
 
-    for geom in df.geometry:
+    total_dist = 0.0
+    started = False
+
+    for idx, row in df.iterrows():
+        geom = wkt.loads(row['segment_geom'])
         if not isinstance(geom, LineString):
             continue
+
         coords = list(geom.coords)
-        for i in range(1, len(coords)):
-            prev = coords[i - 1]
+        segment_start_dist = total_dist
+
+        for i in range(len(coords)):
             curr = coords[i]
-            dx = np.sqrt((curr[0] - prev[0])**2 + (curr[1] - prev[1])**2) / 1000.0  # assuming coords in meters (e.g., EPSG:2056)
+            if not started:
+                elev = curr[2] if len(curr) == 3 else 0
+                dists.append(0.0)
+                elevations.append(elev)
+                prev = curr
+                started = True
+                continue
+
+            dx = np.linalg.norm(np.array(curr[:2]) - np.array(prev[:2])) / 1000.0  # meters to km
             total_dist += dx
             elev = curr[2] if len(curr) == 3 else 0
             dists.append(total_dist)
             elevations.append(elev)
+            prev = curr
 
-    ax.plot(dists, elevations, marker='o', color='green')
+        # Label the start of the segment with von_pkt_name
+        start_elev = coords[0][2] if len(coords[0]) == 3 else 0
+        labels.append((segment_start_dist, start_elev, row['von_pkt_name']))
+        label_positions.append((segment_start_dist, start_elev))
+
+        # Save last coordinates for labeling the end later
+        last_coords = coords
+
+    # Add final label at the end of the last segment
+    end_elev = last_coords[-1][2] if len(last_coords[-1]) == 3 else 0
+    labels.append((total_dist, end_elev, row['bis_pkt_name']))
+    label_positions.append((total_dist, end_elev))
+
+    # Plot elevation profile
+    ax.plot(dists, elevations, color='green')
     ax.fill_between(dists, elevations, color='yellow', alpha=0.5)
+
+    # Mark labeled points
+    label_xs, label_ys = zip(*label_positions)
+    ax.scatter(label_xs, label_ys, color='green', s=30, zorder=5)
+
     ax.set_xlabel("Distanz (km)")
     ax.set_ylabel("Höhe (m ü. M.)")
     ax.set_title("Höhenprofil")
+
+    # Dynamic vertical space for label rotation
+    max_elev = max(elevations)
+    label_padding = 700
+    ax.set_ylim(top=max_elev + label_padding)
+
+    fig.subplots_adjust(top=0.8)
+
+    # label_offset = 20  # meters above the point
+
+    for dist, elev, label in labels:
+        ax.text(
+            dist, elev + 30, label,
+            ha='left',           # shift start of rotated label over the point
+            va='center',
+            fontsize=9,
+            rotation=90,
+            rotation_mode='anchor',
+            clip_on=False
+        )
+
     ax.grid(True)
-    fig.tight_layout()
+    # fig.tight_layout()
+    plt.show()
     return fig
 
 
