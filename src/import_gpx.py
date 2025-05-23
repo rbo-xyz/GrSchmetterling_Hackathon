@@ -2,16 +2,16 @@ import xml.etree.ElementTree as ET
 import os
 import requests
 import json
+from collections import defaultdict, deque
 
 import numpy as np
-
 import geopandas as gpd
 import pandas as pd
 from shapely.geometry import Point, LineString, MultiPoint, MultiLineString, mapping
 from shapely.ops import linemerge, split, substring
 import gpxpy
 from pyproj import Transformer
-from collections import defaultdict, deque
+
 
 transformer = Transformer.from_crs("EPSG:4326", "EPSG:2056", always_xy=True)
 
@@ -19,7 +19,19 @@ transformer = Transformer.from_crs("EPSG:4326", "EPSG:2056", always_xy=True)
 ## <---------------------------------------------------------------------------------------------------------------->
 
 def import_gpx(filepath: str):
-    
+    """
+    Importiert eine GPX-Datei und gibt ein GeoDataFrame mit segmentierten Strecken und Waypoints zurück.
+
+    Die Funktion erkennt automatisch, ob die GPX-Datei aus der Swisstopo-App oder dem Swisstopo-Web-GIS stammt, und wählt die passende Importmethode.
+    Falls die Quelle nicht erkannt wird, wird ein leeres GeoDataFrame mit der erwarteten Struktur zurückgegeben.
+
+    Parameter:
+        filepath (str): Pfad zur GPX-Datei.
+
+    Rückgabe:
+        gpd.GeoDataFrame: GeoDataFrame mit segmentierten Strecken und zugehörigen Waypoints im LV95-Koordinatensystem,
+                          oder ein leeres GeoDataFrame bei unbekannter Quelle.
+    """
     ## Fehlerbehandlung wird nicht mehr benötigt
     # ## Filepath vorhanden
     # if not os.path.isfile(filepath):

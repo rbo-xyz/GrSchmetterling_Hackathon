@@ -1,0 +1,24 @@
+## import
+
+numpy
+geopandas
+pandas
+shapely
+gpxpy
+pyproj
+
+## export 
+
+PIL (pillow)
+reportlabs
+itertools
+
+## maps
+
+matplotlib
+contextily
+
+## Main
+
+PyQT
+(PyQt 6)
