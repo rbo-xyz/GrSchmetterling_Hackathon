@@ -39,7 +39,7 @@ Füge die Git web URL `https://github.com/rbo-xyz/GrSchmetterling_Hackathon.git`
 
 ```shell
 # go to YML-File
-cd preprocessing
+cd config
 # Füge conda-forge den als Channel in conda hinzu, da sonst nicht alle Pakete installiert werden können.
 conda env create -f requirements.yml
 # Env aktivieren.
