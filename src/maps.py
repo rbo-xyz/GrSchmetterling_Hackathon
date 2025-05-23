@@ -226,10 +226,22 @@ def generate_route_map(df):
     fig.savefig(path_file,dpi=300)
     plt.close(fig)
 
+from PIL import Image
+from reportlab.lib.utils import ImageReader
+
 def draw_scaled_image(c, img_path, x, y, max_width):
     img = Image.open(img_path)
-    width_px, height_px = img.size
-    aspect = height_px / width_px
-    draw_width = max_width
-    draw_height = draw_width * aspect
+    dpi = img.info.get("dpi", (300,))[0]  # fallback = 300
+    width_inch = img.width / dpi
+    height_inch = img.height / dpi
+
+    draw_width = width_inch * 72
+    draw_height = height_inch * 72
+
+    if draw_width > max_width:
+        scale = max_width / draw_width
+        draw_width *= scale
+        draw_height *= scale
+
     c.drawImage(ImageReader(img_path), x, y, width=draw_width, height=draw_height)
+

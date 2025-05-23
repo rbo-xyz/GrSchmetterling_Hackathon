@@ -19,6 +19,7 @@ from io import BytesIO
 # import geopandas as gpd
 # import pandas as pd
 from datetime import timedelta
+from src.maps import draw_scaled_image
 
 # More Dummy data for testing
 # filename = "marschzeit-grid.pdf"                                    # exists
@@ -391,14 +392,10 @@ def export_to_pdf(
                     c.setFont("Helvetica", fontsize)
                     c.drawString(second_grid_xlist[0] + 2, text_y2, bemerkung_text)
 
-                img = Image.open("C://temp_schmetterling//elevation.png")
 
-                # Größe abfragen
-                breite, hoh = img.size
 
-                image_path = "C://temp_schmetterling//elevation.png"
-                img_reader = ImageReader(image_path)#bild einfügen
-                c.drawImage(img_reader, 20, 25, width = inch*10, height = inch*3)
+
+        draw_scaled_image(c, "C://temp_schmetterling/elevation.png", x=40, y=420, max_width=500)
 
         c.showPage()
         # Start page numbr 2
@@ -430,5 +427,7 @@ def export_to_pdf(
         path = "C://temp_schmetterling"
         if os.path.exists(path):
             os.rmdir(path)
+
+    draw_scaled_image(c, "C://temp_schmetterling/map.png", x=40, y=40, max_width=w-50)
 
     c.save()
