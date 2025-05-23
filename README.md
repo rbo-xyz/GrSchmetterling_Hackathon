@@ -67,10 +67,11 @@ Mit dem Tool Symbol können die Einzelnen Wegpunkte platziert werden. Anschliess
 
 
 ## Verwendung des Marschzeitberechungs Tool
+Der Pfad zum GPX, Angaben zur Laufgeschwindigkeit , usw. müssen eingegeben werden <br/>
 <p align="center">
     <img src="data/Fenster_ausgefuellt.jpg" alt="Schmetterlings" width="800"/>
 </p>
-Der Pfad zum GPX, Angaben zur Laufgeschwindigkeit , usw. müssen eingegeben werden <br/>
+
 
 
 
