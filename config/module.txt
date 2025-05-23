@@ -22,3 +22,4 @@ contextily
 
 PyQT
 (PyQt 6)
+PyQt5
