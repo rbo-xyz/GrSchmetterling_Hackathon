@@ -22,7 +22,7 @@ import pandas as pd
 class MarschzeitBerechnung(QWidget):
     def __init__(self):
         super().__init__()
-        uic.loadUi("possible_UI_2.ui", self)  # UI laden
+        uic.loadUi("src/UserInterface.ui", self)  # UI laden
 
         self.setWindowIcon(QIcon("icons/logo.png"))
         self.setWindowTitle("Marschzeitberechnung")
