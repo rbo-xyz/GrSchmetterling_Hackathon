@@ -65,4 +65,7 @@ Mit dem Tool Symbol können die Einzelnen Wegpunkte platziert werden. Anschliess
 <p align="center">
     <img src="data/Fenster_ausgefuellt.jpg" alt="Schmetterlings" width="800"/>
 </p>
+Der Pfad zum GPX, Angaben zur Laufgeschwindigkeit , usw. müssen eingegeben werden <br/>
 
+anschliessend kann auf den **berechnen** Knopf gedrückt werden. Sobald dies durch ist kann im Fenster die Daten betrachtet werden. <br/>
+Über den Export Konpf kann ein PDf generiert werden.
