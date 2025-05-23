@@ -4,7 +4,9 @@ from shapely.geometry import LineString
 import numpy as np
 import pandas as pd
 
-def calc_leistungskm (gdf):
+def calc_leistungskm (gdf: gpd.GeoDataFrame,
+                      pace: float = 4.0):
+    
     for idx, row in gdf.iterrows():
         line = row.segment_geom
         
@@ -25,9 +27,9 @@ def calc_leistungskm (gdf):
         leistungskm = np.sum(leistungskm_segs)
 
         # Marschzeitberechnung aus den Leistungskilometer
-        # default Geschwindigkeit von 4km/h
-        mz = round((leistungskm / 4 ) * 60, 0) # in Minuten
-        
+        # default Geschwindigkeit von 4km/h / wird übernommen durch Parameter pace
+        mz = round((leistungskm / pace ) * 60, 0) # in Minuten
+        # 
         # In Dataframe schreiben
         gdf.at[idx, 'cumulative_km'] = km
         gdf.at[idx, 'elevation'] = hm
