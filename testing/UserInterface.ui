@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
+    <width>736</width>
     <height>700</height>
    </rect>
   </property>
@@ -177,15 +177,11 @@
      </property>
     </widget>
    </item>
-   <!-- NEU: GroupBox für das Höhenprofil -->
    <item>
-    <widget class="QGroupBox" name="groupBoxHoehenprofil">
-     <property name="title">
+    <widget class="QGraphicsView" name="graphicsViewProfil">
+     <property name="toolTip">
       <string>Höhenprofil</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayoutHoehenprofil">
-      <!-- Leer, wird im Python-Code mit dem Canvas gefüllt -->
-     </layout>
     </widget>
    </item>
   </layout>
