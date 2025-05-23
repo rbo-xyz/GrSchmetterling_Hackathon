@@ -7,41 +7,41 @@ from itertools import islice
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, A3
 import geopandas as gpd
-from import_gpx import import_gpx
-from calculate import calc_leistungskm
-import geopandas as gpd
-import pandas as pd
-from datetime import timedelta
+# from import_gpx import import_gpx
+# from calculate import calc_leistungskm
+# import geopandas as gpd
+# import pandas as pd
+# from datetime import timedelta
 
 # More Dummy data for testing
-filename = "marschzeit-grid.pdf"                                    # exists
-titel = "Crazy Routenname: HIER KÖNNTE IHRE WERBUNG STEHEN"    # exists
-geschwindigkeit = 4                    # exists
-tot_dist = 10.5                     # exists not implemented
-tot_hm_pos = 500                    # exists
-tot_hm_neg = 300                    # exists
-tot_marschzeit_h = 2                # exists
-tot_marschzeit_min = 30             # exists
-ersteller = "Alex & Ignazio"        # exists
-erstellerdatum = "11.09.2001"                # exists not implemented
-#gdf erzeugen
+# filename = "marschzeit-grid.pdf"                                    # exists
+# titel = "Crazy Routenname: HIER KÖNNTE IHRE WERBUNG STEHEN"    # exists
+# geschwindigkeit = 4                    # exists
+# tot_dist = 10.5                     # exists not implemented
+# tot_hm_pos = 500                    # exists
+# tot_hm_neg = 300                    # exists
+# tot_marschzeit_h = 2                # exists
+# tot_marschzeit_min = 30             # exists
+# ersteller = "Alex & Ignazio"        # exists
+# erstellerdatum = "11.09.2001"                # exists not implemented
+# #gdf erzeugen
 
-gpx = import_gpx("C:/Users/alexa/GrSchmeterling_Hackathon/data/7-gipfel-tour-flumserberg.gpx")
-gdf_calc_t = calc_leistungskm(gpx)
+# gpx = import_gpx("C:/Users/alexa/GrSchmeterling_Hackathon/data/7-gipfel-tour-flumserberg.gpx")
+# gdf_calc_t = calc_leistungskm(gpx)
 
 
-df = gdf_calc_t[0]  # get the DataFrame from the tuple
+# df = gdf_calc_t[0]  # get the DataFrame from the tuple
 
-gdf_calc = pd.DataFrame({
-    'Abschnitt': df['segment_id'],
-    'Von': df['von_pkt_name'],
-    'Nach': df['bis_pkt_name'],
-    'Laenge [km]': df['cumulative_km'].round(2),
-    'Hoehenmeter [m]': df['elevation'].round(1),
-    'Leistungskm': df['Leistungskm [km]'].round(2),
-    'Marschzeit [min]': df['Marschzeit [min]'].round(0),
-    'Hinweis': ""  # Add an empty 'Hinweis' column
-})
+# gdf_calc = pd.DataFrame({
+#     'Abschnitt': df['segment_id'],
+#     'Von': df['von_pkt_name'],
+#     'Nach': df['bis_pkt_name'],
+#     'Laenge [km]': df['cumulative_km'].round(2),
+#     'Hoehenmeter [m]': df['elevation'].round(1),
+#     'Leistungskm': df['Leistungskm [km]'].round(2),
+#     'Marschzeit [min]': df['Marschzeit [min]'].round(0),
+#     'Hinweis': ""  # Add an empty 'Hinweis' column
+# })
 
 
 # Daten von main.py
@@ -415,19 +415,19 @@ def export_to_pdf(
 
 
 
-export_to_pdf(
-    gdf_calc,
-    filename,
-    geschwindigkeit,
-    tot_dist,
-    tot_hm_pos,
-    tot_hm_neg,
-    tot_marschzeit_h,
-    tot_marschzeit_min,
-    titel,
-    ersteller,
-    erstellerdatum
-)
+# export_to_pdf(
+#     gdf_calc,
+#     filename,
+#     geschwindigkeit,
+#     tot_dist,
+#     tot_hm_pos,
+#     tot_hm_neg,
+#     tot_marschzeit_h,
+#     tot_marschzeit_min,
+#     titel,
+#     ersteller,
+#     erstellerdatum
+# )
 
 
-os.startfile(filename)
+# os.startfile(filename)
