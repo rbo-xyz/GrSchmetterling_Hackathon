@@ -6,12 +6,13 @@ from src.calculate import calc_leistungskm
 from src.import_gpx import import_gpx
 from src.maps import generate_elevation_plot 
 from src.MICHI import export_to_pdf
+from src.gdf_show import show
 
 #import Module
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox,QGraphicsScene,QTableWidget, QTableWidgetItem
-from PyQt5.QtCore import QUrl
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox,QGraphicsScene,QTableWidget, QTableWidgetItem 
+from PyQt5.QtCore import QUrl, QDate
+from PyQt5.QtGui import QPixmap, QIcon
 import sys
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import pandas as pd
@@ -21,10 +22,12 @@ import pandas as pd
 class MarschzeitBerechnung(QWidget):
     def __init__(self):
         super().__init__()
-        uic.loadUi("possible_UI_2.ui", self)  # UI laden
+        uic.loadUi("src/UserInterface.ui", self)  # UI laden
 
+        self.setWindowIcon(QIcon("icons/logo.png"))
         self.setWindowTitle("Marschzeitberechnung")
         self.setMinimumSize(1000, 800)
+        self.dateEditDatum.setDate(QDate.currentDate())
 
         # Button Verbindungen
         
@@ -32,13 +35,9 @@ class MarschzeitBerechnung(QWidget):
         self.pushButtonCalculate.clicked.connect(self.calculate)
         self.pushButtonExportPDF.clicked.connect(self.export_pdf)
 
-        #Line Edits
         
-        # Zugriff auf die Meta-Informationen aus dem UI
-        self.input_titel = self.lineEditTitel.text().strip()
-        self.input_geschwindigkeit = self.lineEditSpeed.text().strip()
-        self.input_ersteller = self.lineEditErsteller.text().strip()
-        self.input_erstellerdatum = self.dateEditDatum.date().toString("dd.MM.yyyy")
+        
+        
 
 
 
@@ -58,7 +57,7 @@ class MarschzeitBerechnung(QWidget):
     def calculate(self):
         print("calculate wurde gedrückt")
         #progressbar Value auf 0 setzen
-        self.progressBar.setValue(0)
+        self.progressBar.setValue(10)
 
         #Kontrolle ob eine Datei geladen wurde
         if not hasattr(self, 'filename_i') or not self.filename_i:
@@ -72,23 +71,38 @@ class MarschzeitBerechnung(QWidget):
             #progressbar Value auf 50% setzen
             self.progressBar.setValue(50)
 
+
+            # Zugriff auf die Meta-Informationen aus dem UI (hier eingesetzt, da die Variablen abgefüllt sein müssen!)
+            self.input_titel = self.lineEditTitel.text().strip()
+            #Abrage ob Geschwindikeit eingegeben wurde um Programmabsturz zu vermeiden
+            try:
+                self.input_geschwindigkeit = float(self.lineEditSpeed.text().strip())
+            except ValueError:
+                QMessageBox.critical(self, "Ungültige Eingabe", "Bitte eine gültige Geschwindigkeit in km/h eingeben.")
+                return
+            self.input_ersteller = self.lineEditErsteller.text().strip()
+            self.input_erstellerdatum = self.dateEditDatum.date().toString("dd.MM.yyyy")
+
+
             # Berechnung der Leistungskilometer, Marschzeit, Distanz und Höhenmeter
             self.gdf_calc, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min = calc_leistungskm(self.gdf_imp, self.input_geschwindigkeit)
             print("Berechnung wurde ausgeführt")
+            # self.gdf_calc.to_csv("test_2.csv")
+
 
             #progressbar Value auf 75% setzen
             self.progressBar.setValue(75)
             
 
-            #Darstellung des Dataframes im UI
-            #TODO
-            self.tableWidget.setRowCount(len(self.gdf_calc))
-            self.tableWidget.setColumnCount(len(self.gdf_calc.columns))
-            self.tableWidget.setHorizontalHeaderLabels(self.gdf_calc.columns.tolist())
+            #Darstellung des Dataframes (als Tabelle) im UI
+            self.gdf_show = show(self.gdf_calc)
+            self.tableWidget.setRowCount(len(self.gdf_show))
+            self.tableWidget.setColumnCount(len(self.gdf_show.columns))
+            self.tableWidget.setHorizontalHeaderLabels(self.gdf_show.columns.tolist())
 
-            for row_idx in range(len(self.gdf_calc)):
-                for col_idx, col_name in enumerate(self.gdf_calc.columns):
-                    item = QTableWidgetItem(str(self.gdf_calc.iloc[row_idx, col_idx]))
+            for row_idx in range(len(self.gdf_show)):
+                for col_idx, col_name in enumerate(self.gdf_show.columns):
+                    item = QTableWidgetItem(str(self.gdf_show.iloc[row_idx, col_idx]))
                     self.tableWidget.setItem(row_idx, col_idx, item)
             print("Dataframe wurde dargestellt")
 
