@@ -62,7 +62,7 @@ Mit dem Tool Symbol können die Einzelnen Wegpunkte platziert werden. Anschliess
 
 Über das Dropdown bei Export kann ein **GPX** exportiert werden.<br/>
 
-** pro GPX darf nur eine Route erfasst sein! **
+**pro GPX darf nur eine Route erfasst sein!**
 
 
 
