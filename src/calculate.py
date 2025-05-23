@@ -59,16 +59,19 @@ def calc_leistungskm (gdf: gpd.GeoDataFrame,
         mz = round((leistungskm / pace ) * 60, 0) # in Minuten
         # 
         # In Dataframe schreiben
-        km_list = gdf['cumulative_km'].tolist()
-        hm_list = gdf['elevation'].tolist()
-        leistungskm_list = gdf['Leistungskm [km]'].tolist()
-        mz_list = gdf['Marschzeit [min]'].tolist()
 
-        tot_dist = round(np.sum(km_list),3)
-        tot_lkm = round(np.sum(leistungskm_list),3)
+        gdf.at[idx, 'cumulative_km'] = km
+        gdf.at[idx, 'elevation'] = hm
+        gdf.at[idx, 'Leistungskm [km]'] = leistungskm
+        gdf.at[idx, 'Marschzeit [min]'] = mz
+
+        
+
+        tot_dist = round(np.sum(km),3)
+        tot_lkm = round(np.sum(leistungskm),3)
         tot_hm_pos = round(np.sum(h_segs[h_segs > 0]),0)
         tot_hm_neg = round(np.sum(h_segs[h_segs < 0]),0)
-        tot_marschzeit_h = int(np.sum(mz_list/60))
-        tot_marschzeit_min = int(round((int(np.sum(mz_list/60)) - tot_marschzeit_h) * 60))
+        tot_marschzeit_h = int(np.sum(mz/60))
+        tot_marschzeit_min = int(round((int(np.sum(mz/60)) - tot_marschzeit_h) * 60))
 
     return gdf, tot_dist, tot_lkm, tot_hm_pos, tot_hm_neg, tot_marschzeit_h, tot_marschzeit_min
