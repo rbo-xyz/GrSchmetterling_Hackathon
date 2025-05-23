@@ -239,24 +239,54 @@ def combine_waypoints_lines(gdf_lines: gpd.GeoDataFrame,
     ]]
 
     ## Sortierung Kontrolieren
-    # Herausfinden von Start und Endpunkt
+    # # Herausfinden von Start und Endpunkt
+    # all_vons = set(out['von_pkt_name'])
+    # all_bis  = set(out['bis_pkt_name'])
+    # start = (all_vons - all_bis).pop()
+    # end   = (all_bis  - all_vons).pop()
+    # # Lookup Dictionary aufbauen
+    # von_index = {row.von_pkt_name: idx for idx, row in out.iterrows()}
+    # # Topologie-Reihenfolge herstellen
+    # ordered_idx = []
+    # current = start
+    # while current in von_index:
+    #     idx = von_index[current]
+    #     ordered_idx.append(idx)
+    #     current = out.at[idx, 'bis_pkt_name']
+    # # neu sortieren
+    # gdf_sorted = out.loc[ordered_idx].reset_index(drop=True)
+    # gdf_sorted['segment_id'] = gdf_sorted.index + 1
+    # gdf_sorted = gdf_sorted.set_geometry('segment_geom')
+
+    from collections import defaultdict, deque
+
+    ## Herausfinden von Start und Endpunkt
     all_vons = set(out['von_pkt_name'])
     all_bis  = set(out['bis_pkt_name'])
     start = (all_vons - all_bis).pop()
     end   = (all_bis  - all_vons).pop()
-    # Lookup Dictionary aufbauen
-    von_index = {row.von_pkt_name: idx for idx, row in out.iterrows()}
-    # Topologie-Reihenfolge herstellen
+
+    ## Mapping von jedem Start‐Knoten auf eine Queue aller passenden Zeilen
+    von_index = defaultdict(deque)
+    for idx, row in out.iterrows():
+        von_index[row.von_pkt_name].append(idx)
+
+    ## Topologie-Reihenfolge herstellen
     ordered_idx = []
     current = start
-    while current in von_index:
-        idx = von_index[current]
+    while von_index[current]:
+        idx = von_index[current].popleft()
         ordered_idx.append(idx)
         current = out.at[idx, 'bis_pkt_name']
-    # neu sortieren
-    gdf_sorted = out.loc[ordered_idx].reset_index(drop=True)
-    gdf_sorted['segment_id'] = gdf_sorted.index + 1
-    gdf_sorted = gdf_sorted.set_geometry('segment_geom')
+
+    ## Neu sortieren
+    gdf_sorted = (
+        out
+        .loc[ordered_idx]
+        .reset_index(drop=True)
+        .assign(segment_id=lambda df: df.index + 1)
+        .set_geometry('segment_geom')
+    )
 
     ## DType anpassen
     gdf_sorted["segment_id"]     = gdf_sorted["segment_id"].astype("int16")
@@ -321,34 +351,108 @@ def to_3d_linestring(line2d: LineString):
 ## <---------------------------------------------------------------------------------------------------------------->
 ## <---------------------------------------------------------------------------------------------------------------->
 
+## OLD Profile API: Ohne Abfrage der Stringlänge
+
+# def to_3d_linestring_profile(line2d: LineString,
+#                              crs: int = 2056,
+#                              nb_points: int = 42,
+#                              offset: int | None = None,
+#                              distinct_points: bool = True,
+#                              which: str = "COMB"):
+
+#     nb_points = len(line2d.coords)
+#     geom_geojson = mapping(line2d)
+
+#     url = "https://api3.geo.admin.ch/rest/services/profile.json"
+#     params: dict[str, str] = {
+#         "geom": json.dumps(geom_geojson),
+#         "sr": str(crs),
+#         "nb_points": str(nb_points),
+#         "distinct_points": str(distinct_points).lower(),
+#     }
+#     if offset is not None:
+#         params["offset"] = str(offset)
+
+#     r = requests.get(url, params=params, timeout=10)
+#     r.raise_for_status()
+
+#     profile = r.json()
+
+#     coords3d = [
+#         (pt["easting"], pt["northing"], pt["alts"][which])
+#         for pt in profile
+#     ]
+
+#     return LineString(coords3d)
+
 def to_3d_linestring_profile(line2d: LineString,
                              crs: int = 2056,
-                             nb_points: int = 42,
                              offset: int | None = None,
                              distinct_points: bool = True,
-                             which: str = "COMB"):
+                             which: str = "COMB",
+                             max_geom_chars: int = 3000):
+    """
+    Baut ein 3D-Linestring auf, auch wenn der ursprüngliche 2D-Linestring
+    (im GeoJSON-Parameter) zu lang für einen einzigen GET-Request wäre.
+    """
 
-    nb_points = len(line2d.coords)
-    geom_geojson = mapping(line2d)
+    ## Definition der Variabeln
+    coords = list(line2d.coords)
+    geom = mapping(line2d)
+    geom_str = json.dumps(geom)
 
-    url = "https://api3.geo.admin.ch/rest/services/profile.json"
-    params: dict[str, str] = {
-        "geom": json.dumps(geom_geojson),
+    ## Check der Länge, Rekursive aufteilung und abfrage
+    if len(geom_str) > max_geom_chars:
+
+        ## Abschätzen, wie viele Koordinaten pro Chunk
+        n = len(coords)
+        avg_chars_per_coord = len(geom_str) / n
+        chunk_size = max(int(max_geom_chars / avg_chars_per_coord), 2)
+        step = chunk_size - 1 
+
+        ## Teil-Linestrings erzeugen
+        segments = []
+        for i in range(0, n - 1, step):
+            end = min(i + chunk_size, n)
+            segments.append(LineString(coords[i:end]))
+
+        ## Für jedes Segment einmal abrufen
+        seg3d_list = [
+            to_3d_linestring_profile(
+                seg,
+                crs=crs,
+                offset=offset,
+                distinct_points=distinct_points,
+                which=which,
+                max_geom_chars=max_geom_chars
+            )
+            for seg in segments
+        ]
+
+        ## Linestring wieder verbinden
+        merged_coords = list(seg3d_list[0].coords)
+        for seg3d in seg3d_list[1:]:
+            merged_coords.extend(seg3d.coords[1:])
+        return LineString(merged_coords)
+
+    ## Normale API-Request
+    params = {
+        "geom": json.dumps(geom),
         "sr": str(crs),
-        "nb_points": str(nb_points),
+        "nb_points": str(len(coords)),
         "distinct_points": str(distinct_points).lower(),
     }
     if offset is not None:
         params["offset"] = str(offset)
 
+    url = "https://api3.geo.admin.ch/rest/services/profile.json"
     r = requests.get(url, params=params, timeout=10)
     r.raise_for_status()
-
     profile = r.json()
 
     coords3d = [
         (pt["easting"], pt["northing"], pt["alts"][which])
         for pt in profile
     ]
-
+    
     return LineString(coords3d)
