@@ -53,7 +53,7 @@ def calc_leistungskm (gdf: gpd.GeoDataFrame,
         # Hoehendiffernzen berechnen des Segments
         delta_z = np.diff(coords[:, 2])
         h_segs = delta_z.copy()
-        hm = np.sum(h_segs) # in Meter
+        hm = round(np.sum(h_segs),0) # in Meter
         
         # Leistungskilometer pro Segement berechnen
         leistungskm_segs = d_segs / 1000.0 + np.absolute(h_segs) / 100.0
@@ -61,7 +61,7 @@ def calc_leistungskm (gdf: gpd.GeoDataFrame,
 
         # Marschzeitberechnung aus den Leistungskilometer
         # default Geschwindigkeit von 4km/h / wird übernommen durch Parameter pace
-        mz = round((leistungskm / pace ) * 60, 0) # in Minuten
+        mz = round((leistungskm / pace ) * 60,0) # in Minuten
         # 
         # In Dataframe schreiben
 
