@@ -35,6 +35,11 @@ def calc_leistungskm (gdf: gpd.GeoDataFrame,
             - tot_marschzeit_h (int): Marschzeit Stundenanteil
             - tot_marschzeit_min (int): Marschzeit Minutenanteil
     """
+    #definition leere Variablen für for-schleife
+    tot_hm_pos = 0
+    tot_hm_neg = 0
+
+
     for idx, row in gdf.iterrows():
         line = row.segment_geom
         
@@ -65,6 +70,10 @@ def calc_leistungskm (gdf: gpd.GeoDataFrame,
         gdf.at[idx, 'Leistungskm [km]'] = leistungskm
         gdf.at[idx, 'Marschzeit [min]'] = mz
 
+        #totale Höhendifferenz berechnen
+        tot_hm_pos += np.sum(h_segs[h_segs > 0])
+        tot_hm_neg += np.sum(h_segs[h_segs < 0])
+
     # erstellen von Liste aus df Spalten
 
     km_List = gdf['cumulative_km'].tolist()
@@ -75,8 +84,8 @@ def calc_leistungskm (gdf: gpd.GeoDataFrame,
     # Berechnungen von Marschzeit und Leistungskilometer
     tot_dist = round(np.sum(km_List),3)
     tot_lkm = round(np.sum(leistungskm_List),3)
-    tot_hm_pos = round(np.sum(h_segs[h_segs > 0]),0)
-    tot_hm_neg = round(np.sum(h_segs[h_segs < 0]),0)
+    tot_hm_pos = round(tot_hm_pos)
+    tot_hm_neg = round(tot_hm_neg)
     tot_marschzeit_h = int(np.sum(mz_List)/60)
     tot_marschzeit_min = int(round((int(np.sum(mz_List)) - tot_marschzeit_h * 60)))
 
