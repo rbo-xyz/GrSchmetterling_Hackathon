@@ -3,29 +3,9 @@
 </p>
 
 # Marschzeitberechnung
-Dies ist ein Tool fürs Plannen von Wanderungen. Gestützt and die Marschzeitplanungstabelle von PBS wird hiermit eine Autonome Version bereitgestellt. Das Tool benötigt eine GPX Datei mit der Route von Geo.Admin (Erklährung weiter unten).
+Dies ist ein Tool fürs Plannen von Wanderungen. Gestützt and die Marschzeitplanungstabelle von PBS wird hiermit eine Autonome Version bereitgestellt. Das Tool benötigt eine GPX Datei mit der Route von [Geo Admin](https://map.geo.admin.ch/) (Erklährung weiter unten).
 
 Mit Diesem Repo kann vom einrichten des Enviroments bis hin zur Nutzung zu verfühgung gestell. 
-
-- **Frontend:** React.js, OpenLayers und MUI
-- **Backend:** FastAPI
-
-GitHub Pages: https://tickettoescape.github.io/4230_TickettoEscape/
-
-## Projektstruktur
-```bash
-├───client                 # Frontend-Code
-│    ├───node_modules      # Abhängigkeiten des Frontends (automatisch generiert)
-│    ├───public            # Öffentliche statische Ressourcen
-│    └───src               # React Komponenten
-│        ├───components        # Strukturierte React-Komponenten
-│        │    ├───main          # Hauptkomponenten des Interfaces
-│        │    └───start         # Komponenten für das erstellen des Spiels
-│        └───data              # Statische Daten
-├───docs                   # Projektdokumentation
-├───preprocessing          # Skripte zur Datenvorbereitung und -verarbeitung
-└───server                 # Backend-Code und serverseitige Logik
-```
 
 
 ## Requirements
@@ -33,8 +13,6 @@ GitHub Pages: https://tickettoescape.github.io/4230_TickettoEscape/
 - [Git](https://git-scm.com/)
 - IDE wie [Visual Studio Code](https://code.visualstudio.com/) 
 - [Anaconda Distribution](https://www.anaconda.com/products/distribution) oder [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
-- Node.js und npm ([https://docs.npmjs.com/downloading-and-installing-node-js-and-npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm))
-- [PG Admin4](https://www.pgadmin.org/download/)
 
 ## Repository lokal klonen
 Mit Git in einem Terminal das GitHub Repository *Ticket to Escape* in ein lokales Verzeichnis klonen.
