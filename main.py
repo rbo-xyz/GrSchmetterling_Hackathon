@@ -17,6 +17,7 @@ import sys
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import pandas as pd
+import xml.etree.ElementTree as ET
 
 
 
@@ -76,6 +77,12 @@ class MarschzeitBerechnung(QWidget):
             return  # Berechnung abbrechen
         else:
             #import der GPS Datei über den Importer
+            ## Filepath ist lesbar
+            try:
+                ET.parse(self.filename_i)
+            except ET.ParseError as e:
+                QMessageBox.critical(self, "Ungültige Eingabe", "Das File ist nicht lesbar.")
+            
             self.gdf_imp = import_gpx(self.filename_i)
             print("Import wurde ausgeführt")
 
