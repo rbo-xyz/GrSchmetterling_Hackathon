@@ -68,7 +68,7 @@ class MarschzeitBerechnung(QWidget):
 
     def calculate(self):
         print("calculate wurde gedrückt")
-        #progressbar Value auf 0 setzen
+        #progressbar Value auf 10 setzen
         self.progressBar.setValue(10)
 
         #Kontrolle ob eine Datei geladen wurde
@@ -174,11 +174,15 @@ class MarschzeitBerechnung(QWidget):
 
 
     def export_pdf(self):
+        #progressbar Value auf 10 setzen
+        self.progressBar.setValue(10)
+
         print("PDF exportieren wurde gedrückt")
         self.filename_s, typ= QFileDialog.getSaveFileName(self, "Datei Speichern",
                                                    "",
                                                    "PDF (*.PDF)")
-        #TODO 
+        #progressbar Value auf 30 setzen
+        self.progressBar.setValue(30)
         print(self.filename_s)
         print(self.input_geschwindigkeit)
         print(self.tot_dist)
@@ -191,6 +195,9 @@ class MarschzeitBerechnung(QWidget):
         print(self.input_erstellerdatum)
 
         export_to_pdf(self.gdf_calc, self.filename_s,self.input_geschwindigkeit, self.tot_dist, self.tot_lkm, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min, self.input_titel, self.input_ersteller, self.input_erstellerdatum)
+        
+        #progressbar Value auf 100 setzen
+        self.progressBar.setValue(100)
         print("Export wurde ausgeführt")
 
 if __name__ == "__main__":
