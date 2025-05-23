@@ -44,6 +44,7 @@ conda activate <myname>
 Bei diesem Programm wird auf folgende API zugegriffen:
 - Point HEIGHT_URL = "https://api3.geo.admin.ch/rest/services/height"
 - Line HEIGHT_URL = "https://api3.geo.admin.ch/rest/services/profile.json"
+
 um aus 2D Geometrien 3D zu erstellen.
 
 Auf https://api3.geo.admin.ch/rest/services sind maximal Abfragen mit 5000 Zeichen möglich.
