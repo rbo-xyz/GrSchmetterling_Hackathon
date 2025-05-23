@@ -6,6 +6,7 @@ import json
 import numpy as np
 
 import geopandas as gpd
+import pandas as pd
 from shapely.geometry import Point, LineString, MultiPoint, MultiLineString, mapping
 from shapely.ops import linemerge, split, substring
 import gpxpy
@@ -38,7 +39,7 @@ def import_gpx(filepath: str):
     if source == "web":
         gdf = import_web(filepath)
     if source == "unknown":
-        pass
+        gdf = dummy_data()
         # raise ValueError(f"Datei '{filepath}' ist weder von der Swisstopo-App noch vom Siwsstopo-GIS erstellt worden.")
 
     return gdf
@@ -574,3 +575,44 @@ def to_3d_linestring_profile(line2d: LineString,
     ]
     
     return LineString(coords3d)
+
+## <---------------------------------------------------------------------------------------------------------------->
+## <---------------------------------------------------------------------------------------------------------------->
+
+def dummy_data():
+    """
+    Erstellt und gibt ein leeres GeoDataFrame mit der für Streckensegmente erwarteten Struktur zurück.
+
+    Das zurückgegebene GeoDataFrame enthält die Spalten:
+        - segment_id: Segment-ID (int16)
+        - von_pkt_name: Name des Start-Waypoints (str)
+        - von_pkt_geom: Geometrie des Start-Waypoints (Point)
+        - bis_pkt_name: Name des End-Waypoints (str)
+        - bis_pkt_geom: Geometrie des End-Waypoints (Point)
+        - segment_geom: Geometrie des Liniensegments (LineString)
+
+    Rückgabe:
+        gpd.GeoDataFrame: Leeres GeoDataFrame mit der erwarteten Struktur und EPSG:4326 als Koordinatensystem.
+    """
+
+    ## Leere Spalten des GeoDataFrames
+    s_int16 = pd.Series(dtype="int16")
+    s_str   = pd.Series(dtype="str")
+    empty_point = gpd.GeoSeries([], dtype="geometry", crs="EPSG:4326")
+    empty_line  = gpd.GeoSeries([], dtype="geometry", crs="EPSG:4326")
+
+    ## Zusammenbau des GeoDataFrames
+    gdf_dummy = gpd.GeoDataFrame(
+        {
+            "segment_id":   s_int16,
+            "von_pkt_name": s_str,
+            "von_pkt_geom": empty_point,
+            "bis_pkt_name": s_str,
+            "bis_pkt_geom": empty_point,
+            "segment_geom": empty_line,
+        },
+        geometry="segment_geom", 
+        crs="EPSG:4326"
+    )
+
+    return gdf_dummy
