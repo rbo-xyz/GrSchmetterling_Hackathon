@@ -1,11 +1,50 @@
+# This ile is in the src folder
 from random import randint, uniform
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import cm
-from random import randint
 import os
 from PIL import Image
 from reportlab.lib.utils import ImageReader
 from itertools import islice
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4, A3
+import geopandas as gpd
+from import_gpx import import_gpx
+from calculate import calc_leistungskm
+import geopandas as gpd
+import pandas as pd
+from datetime import timedelta
+
+# More Dummy data for testing
+filename = "marschzeit-grid.pdf"                                    # exists
+titel = "Crazy Routenname: HIER KÖNNTE IHRE WERBUNG STEHEN"    # exists
+geschwindigkeit = 4                    # exists
+tot_dist = 10.5                     # exists not implemented
+tot_hm_pos = 500                    # exists
+tot_hm_neg = 300                    # exists
+tot_marschzeit_h = 2                # exists
+tot_marschzeit_min = 30             # exists
+ersteller = "Alex & Ignazio"        # exists
+erstellerdatum = "11.09.2001"                # exists not implemented
+#gdf erzeugen
+
+gpx = import_gpx("C:/Users/alexa/GrSchmeterling_Hackathon/data/7-gipfel-tour-flumserberg.gpx")
+gdf_calc_t = calc_leistungskm(gpx)
+
+
+df = gdf_calc_t[0]  # get the DataFrame from the tuple
+
+gdf_calc = pd.DataFrame({
+    'Abschnitt': df['segment_id'],
+    'Von': df['von_pkt_name'],
+    'Nach': df['bis_pkt_name'],
+    'Laenge [km]': df['cumulative_km'].round(2),
+    'Hoehenmeter [m]': df['elevation'].round(1),
+    'Leistungskm': df['Leistungskm [km]'].round(2),
+    'Marschzeit [min]': df['Marschzeit [min]'].round(0),
+    'Hinweis': ""  # Add an empty 'Hinweis' column
+})
+
+
+# Daten von main.py
 
 def grouper(iterable, n):
     it = iter(iterable)
@@ -15,17 +54,59 @@ def grouper(iterable, n):
             break
         yield chunk
 
-def export_to_pdf(data):
-    from reportlab.pdfgen import canvas
-    from reportlab.lib.pagesizes import A4
 
-    c = canvas.Canvas("marschzeit-grid.pdf", pagesize=A4)
+
+def export_to_pdf(
+    gdf_calc,
+    filename,
+    geschwindigkeit,
+    tot_dist,
+    tot_hm_pos,
+    tot_hm_neg,
+    tot_marschzeit_h,
+    tot_marschzeit_min,
+    titel,
+    ersteller,
+    erstellerdatum
+):
+    
+    header = ("Ort, Flurname, Koordinaten", "Nr", "Höhe", "hm", "km", "Lkm", "h:mm", "", "", "", "", "Pause")
+    data = [header]
+
+
+    for i, row in gdf_calc.iterrows():
+        ort = row["Von"] or f"Abschnitt {i+1}"
+        nr = row["Abschnitt"]
+        hoehe = ""  # Kein Höhenwert vorhanden
+        hm = row["Hoehenmeter [m]"]
+        km = row["Laenge [km]"]
+        lkm = row["Leistungskm"]
+
+        # Marschzeit als hh:mm
+        marschzeit_min = int(row["Marschzeit [min]"])
+        zeit_str = str(timedelta(minutes=marschzeit_min))[:-3]  # 'hh:mm'
+
+        pause = row.get("Hinweis", "")
+
+        data.append((ort, nr, hoehe, hm, km, lkm, zeit_str, "", "", "", "", pause))
+
+    #TODO
+    bemerkung_data = ["Bemerkungen"]  # First entry is the header
+    for i in range(1, len(data)):
+        if i % 5 == 0:
+            bemerkung_data.append("Rastplatz mit Aussicht")
+        elif i % 3 == 0:
+            bemerkung_data.append("Weg schlecht markiert")
+        else:
+            bemerkung_data.append("–")
+
+    c = canvas.Canvas(filename, pagesize=A4)
     w, h = A4
     max_rows_per_page = 45
 
     # Layout settings
     x_offset = 20
-    y_offset = 200
+    y_offset = 250
     row_height = 16
     third_table_height = row_height * 7  # Height of the third table
 
@@ -81,7 +162,7 @@ def export_to_pdf(data):
             c.line(x, top_table_y_top, x, top_table_y_bottom)
 
         # Draw text in cells (centered)
-        top_table_values = ["erstellt von:", "Alex\nIgnazio"]
+        top_table_values = ["erstellt von:", f"{ersteller}"]
         for i, text in enumerate(top_table_values):
             lines = text.split("\n")
             x_left = top_table_x[i]
@@ -158,7 +239,7 @@ def export_to_pdf(data):
             c.line(x, top_table_y_top, x, top_table_y_bottom)
 
         # Draw text in cells
-        top_table_values = ["Route:", "Crazy Routenname: HIER KÖNNTE IHRE WERBUNG STEHEN", "Geschwindigkeitsfaktor:"]
+        top_table_values = ["Route:", titel, "Geschwindigkeitsfaktor:" ]
         for i, text in enumerate(top_table_values):
             x = top_table_x[i]
             c.setFont("Helvetica", 9)
@@ -184,7 +265,7 @@ def export_to_pdf(data):
             c.line(x, top_table_y_top, x, top_table_y_bottom)
 
         # Draw text in cells
-        top_table_values = ["Zwischenwerte", "Gesamtsummen", "4.5 (Lkm/h)"]
+        top_table_values = ["Zwischenwerte", "Gesamtsummen", f"{geschwindigkeit} (Lkm/h)"]
         for i, text in enumerate(top_table_values):
             x = top_table_x[i]
             c.setFont("Helvetica", 9)
@@ -206,7 +287,15 @@ def export_to_pdf(data):
             c.line(x, third_table_y_top, x, third_table_y_top - third_table_height)
 
         # Draw rotated text
-        vertical_labels = ["Höhendifferenz in 100m*", "Horizontaldistanz", "Leistungskilometer**", "Marschszeit", "Distanz", "Leistungskilometer**", "Geplante Zeit", "Tatsächliche Zeit", "Pausen"]
+        vertical_labels = ["Höhendifferenz in 100m*", 
+                           "Horizontaldistanz", 
+                           "Leistungskilometer**", 
+                           "Marschszeit", 
+                           "Distanz", 
+                           "Leistungskilometer**", 
+                           "Geplante Zeit", 
+                           "Tatsächliche Zeit", 
+                           "Pausen"]
 
         for i, label in enumerate(vertical_labels):
             x_left = third_table_x[i] + 18  # small left padding
@@ -221,6 +310,39 @@ def export_to_pdf(data):
         
         # Draw main table
         c.grid(xlist, ylist[:len(rows) + 1]) # create number of rows
+
+
+
+        # --- Eighth table: 1 row, 3 columns, below main table ---
+        bottom_table_col_widths = [180, 180, 200]
+        bottom_table_x = [xlist[0]]
+        for width in bottom_table_col_widths:
+            bottom_table_x.append(bottom_table_x[-1] + width)
+
+        # Y-position: a bit below the last y-row of the main table
+        bottom_table_y_top = ylist[len(rows)]
+        bottom_table_y_bottom = bottom_table_y_top - row_height
+
+        # Horizontal lines
+        c.line(bottom_table_x[0], bottom_table_y_top, bottom_table_x[-1], bottom_table_y_top)
+        c.line(bottom_table_x[0], bottom_table_y_bottom, bottom_table_x[-1], bottom_table_y_bottom)
+
+        # Vertical lines
+        for x in bottom_table_x:
+            c.line(x, bottom_table_y_top, x, bottom_table_y_bottom)
+
+        # Dummy text for cells
+        bottom_table_values = [f"TOTAL Marschzeit ohne Pausen: {tot_marschzeit_h}:{tot_marschzeit_min} h",
+                                f"Positiver Höhenunterschied: {tot_hm_pos} m",
+                                  f"Negativer Höhenunterschied: {tot_hm_neg} m"]
+        for i, text in enumerate(bottom_table_values):
+            x_left = bottom_table_x[i]
+            x_right = bottom_table_x[i + 1]
+            cell_center = (x_left + x_right) / 2
+            c.setFont("Helvetica", 9)
+            text_width = c.stringWidth(text, "Helvetica", 9)
+            c.drawString(cell_center - text_width / 2, bottom_table_y_bottom + 4, text)
+
         
         # Draw second (single-column) grid
         c.grid(second_grid_xlist, ylist_second[:len(rows) + 1]) # create number of rows
@@ -273,33 +395,39 @@ def export_to_pdf(data):
     c.save()
 
 
-# Prepare data outside the function
-header = ("Ort, Flurname, Koordinaten", "Nr", "Höhe", "hm", "km", "Lkm", "h:mm", "km", "Lkm", "hh:mm", "hh:mm", "Pause")
-data = [header]
-for i in range(1, 31):
-    ort = f"Station {i}"
-    hoehe = randint(1000, 2000)
-    hm = randint(-200, 200)
-    km1 = round(uniform(0.1, 5.0), 1)
-    lkm1 = round(km1 + abs(hm) / 100, 2)
-    zeit1 = f"{randint(0,1)}:{randint(0,59):02d}"
-    km2 = round(uniform(0.1, 5.0), 1)
-    lkm2 = round(km2 + abs(hm) / 120, 2)
-    zeit2 = f"{randint(0,1)}:{randint(0,59):02d}"
-    gesamt = f"{randint(0,5)}:{randint(0,59):02d}"
-    pause = f"{randint(0,0)}:{randint(1,15):02d}"
-    data.append((ort, i, hoehe, hm, km1, lkm1, zeit1, km2, lkm2, zeit2, gesamt, pause))
 
-bemerkung_data = ["Bemerkungen"]  # First entry is the header
-for i in range(1, len(data)):
-    if i % 5 == 0:
-        bemerkung_data.append("Rastplatz mit Aussicht")
-    elif i % 3 == 0:
-        bemerkung_data.append("Weg schlecht markiert")
-    else:
-        bemerkung_data.append("–")
+# TODO Prepare data outside the function
+# header = ("Ort, Flurname, Koordinaten", "Nr", "Höhe", "hm", "km", "Lkm", "h:mm", "km", "Lkm", "hh:mm", "hh:mm", "Pause")
+# data = [header]
+# for i in range(1, 21):
+#     ort = f"Station {i}"
+#     hoehe = randint(1000, 2000)
+#     hm = randint(-200, 200)
+#     km1 = round(uniform(0.1, 5.0), 1)
+#     lkm1 = round(km1 + abs(hm) / 100, 2)
+#     zeit1 = f"{randint(0,1)}:{randint(0,59):02d}"
+#     km2 = round(uniform(0.1, 5.0), 1)
+#     lkm2 = round(km2 + abs(hm) / 120, 2)
+#     zeit2 = f"{randint(0,1)}:{randint(0,59):02d}"
+#     gesamt = f"{randint(0,5)}:{randint(0,59):02d}"
+#     pause = f"{randint(0,0)}:{randint(1,15):02d}"
+#     data.append((ort, i, hoehe, hm, km1, lkm1, zeit1, km2, lkm2, zeit2, gesamt, pause))
 
-# export_to_pdf(data)
 
-# pdf_path = "marschzeit-grid.pdf"
-# os.startfile(pdf_path)
+
+export_to_pdf(
+    gdf_calc,
+    filename,
+    geschwindigkeit,
+    tot_dist,
+    tot_hm_pos,
+    tot_hm_neg,
+    tot_marschzeit_h,
+    tot_marschzeit_min,
+    titel,
+    ersteller,
+    erstellerdatum
+)
+
+
+os.startfile(filename)
