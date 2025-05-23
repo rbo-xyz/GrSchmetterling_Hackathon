@@ -75,7 +75,7 @@ Der Pfad zum GPX, Angaben zur Laufgeschwindigkeit , usw. müssen eingegeben werd
 
 
 
-anschliessend kann auf den **berechnen** Knopf gedrückt werden. Sobald dies durch ist kann im Fenster die Daten betrachtet werden. <br/>
+Anschliessend kann auf den **berechnen** Knopf gedrückt werden. Sobald dies durch ist kann im Fenster die Daten betrachtet werden. <br/>
 Über den Export Konpf kann ein PDf generiert werden.
 <br/>
 
