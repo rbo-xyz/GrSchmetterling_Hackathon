@@ -61,7 +61,6 @@ class MarschzeitBerechnung(QWidget):
 
     def laden(self):
         #Laden der GPX Datei über einen FileDialog
-        print("GPX laden wurde gedrückt")
         self.filename_i, type = QFileDialog.getOpenFileName(self, "Datei öffnen",
                                                      "", 
                                                      "GPX-File (*.gpx)")
@@ -71,7 +70,6 @@ class MarschzeitBerechnung(QWidget):
 
 
     def calculate(self):
-        print("calculate wurde gedrückt")
         #progressbar Value auf 10 setzen
         self.progressBar.setValue(10)
 
@@ -97,7 +95,6 @@ class MarschzeitBerechnung(QWidget):
                 return
 
             self.gdf_imp = import_gpx(self.filename_i)
-            print("Import wurde ausgeführt")
 
             #progressbar Value auf 50% setzen
             self.progressBar.setValue(50)
@@ -118,8 +115,8 @@ class MarschzeitBerechnung(QWidget):
 
             # Berechnung der Leistungskilometer, Marschzeit, Distanz und Höhenmeter
             self.gdf_calc, self.tot_dist, self.tot_lkm, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min = calc_leistungskm(self.gdf_imp, self.input_geschwindigkeit)
-            print("Berechnung wurde ausgeführt")
-            # self.gdf_calc.to_csv("test_2.csv")
+            
+            
 
 
             #progressbar Value auf 75% setzen
@@ -136,14 +133,14 @@ class MarschzeitBerechnung(QWidget):
                 for col_idx, col_name in enumerate(self.gdf_show.columns):
                     item = QTableWidgetItem(str(self.gdf_show.iloc[row_idx, col_idx]))
                     self.tableWidget.setItem(row_idx, col_idx, item)
-            print("Dataframe wurde dargestellt")
+            
 
             #progressbar Value auf 85% setzen
             self.progressBar.setValue(85)
 
             #Darstellung des Höhenprofils (interaktiv) im UI
             self.fig = generate_elevation_plot(self.gdf_calc)
-            print(type(self.fig))
+        
 
             layout = self.groupBoxHoehenprofil.layout()
             while layout.count():
@@ -181,7 +178,7 @@ class MarschzeitBerechnung(QWidget):
         #progressbar Value auf 10 setzen
         self.progressBar.setValue(10)
 
-        print("PDF exportieren wurde gedrückt")
+        
         self.filename_s, typ= QFileDialog.getSaveFileName(self, "Datei Speichern",
                                                    "",
                                                    "PDF (*.PDF)")
@@ -208,7 +205,7 @@ class MarschzeitBerechnung(QWidget):
         #progressbar Value auf 100 setzen
         self.progressBar.setValue(100)
 
-        print("Export wurde ausgeführt")
+        
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
