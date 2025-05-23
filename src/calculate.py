@@ -59,10 +59,11 @@ def calc_leistungskm (gdf: gpd.GeoDataFrame,
         mz = round((leistungskm / pace ) * 60, 0) # in Minuten
         # 
         # In Dataframe schreiben
-        gdf.at[idx, 'cumulative_km'] = km
-        gdf.at[idx, 'elevation'] = hm
-        gdf.at[idx, 'Leistungskm [km]'] = leistungskm
-        gdf.at[idx, 'Marschzeit [min]'] = mz
+        km = gdf['cumulative_km'].tolist()
+        hm = gdf['elevation'].tolist()
+        leistungskm = gdf['Leistungskm [km]'].tolist()
+        mz = gdf['Marschzeit [min]'].tolist()
+
 
         
 
