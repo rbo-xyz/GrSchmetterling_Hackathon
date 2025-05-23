@@ -72,12 +72,15 @@ def export_to_pdf(
     erstellerdatum
 ):
     
-    header = ("Ort, Flurname, Koordinaten", "Nr", "Höhe", "hm", "km", "Lkm", "h:mm", "", "", "", "", "Pause")
+    header = ("Ort, Flurname, Koordinaten", "Nr", "Höhe", "hm", "km", "Lkm", "h:mm", "km", "Lkm", "h:mm", "h:mm", "h:mm")
     data = [header]
 
 # ['segment_id', 'von_pkt_name', 'von_pkt_geom', 'bis_pkt_name', 'bis_pkt_geom', 
 #  'segment_geom', 'cumulative_km', 'elevation', 'Leistungskm [km]', 'Marschzeit [min]']
 
+    dist_moment = 0
+    lkm_moment = 0
+    time_moment = 0
     for i, row in gdf_calc.iterrows():
         ort = row.get("von_pkt_name", f"Abschnitt {i+1}")
         nr = row.get("segment_id", i + 1)  # Fallback auf Index+1
@@ -87,14 +90,22 @@ def export_to_pdf(
         lkm = round(row.get("Leistungskm [km]", 0), 2)
 
         hoehe = int(round(hoehe.z,0))
+        dist_moment = dist_moment + km
+        lkm_moment = lkm_moment + lkm
+
+        dist_moment = round(dist_moment, 2)
+        lkm_moment = round(lkm_moment, 2)
 
         # Marschzeit als hh:mm
         marschzeit_min = int(row.get("Marschzeit [min]", 0))
         zeit_str = str(timedelta(minutes=marschzeit_min))[:-3]  # 'hh:mm'
 
+        time_moment = time_moment + marschzeit_min
+        zeit_str_moment = str(timedelta(minutes=time_moment))[:-3]  # 'hh:mm'
+
         pause = row.get("Hinweis", "")  # Hinweis existiert evtl. nicht
 
-        data.append((ort, nr, hoehe, hm, km, lkm, zeit_str, "", "", "", "", pause))
+        data.append((ort, nr, hoehe, hm, km, lkm, zeit_str, dist_moment, lkm_moment, zeit_str_moment, "", pause))
 
     c = canvas.Canvas(filename, pagesize=A4)
     w, h = A4

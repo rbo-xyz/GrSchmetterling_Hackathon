@@ -51,5 +51,18 @@ Auf https://api3.geo.admin.ch/rest/services sind maximal Abfragen mit 5000 Zeich
 
 
 ## Route erstellen
+Auf [Geo Admin](https://map.geo.admin.ch/) im Register "Zeichnen & Messen auf Karte" kann mit dem Tool Linie die Wanderroute eingezeichnet werden.<br/>
+*Tipp:* Mehrere Linien pro Route sind erlaubt.<br/>
 
+Mit dem Tool Symbol können die Einzelnen Wegpunkte platziert werden. Anschliessend im Fenster, dass sich geöffnet hat kann im Feld Text kann ein Name angegeben werden. <br/>
+*Tipp:* durch anklicken des Symbols kann das Fenster wieder geöffnet werden. Die Wegpunkte werden bei der Berechnung, automatisch auf den nächsten Punkt auf der Linie verschoben.<br/>
+
+Über das Dropdown bei Export kann ein **GPX** exportiert werden.
+
+
+
+## Verwendung des Marschzeitberechungs Tool
+<p align="center">
+    <img src="data/Fenster_ausgefuellt.jpg" alt="Schmetterlings" width="800"/>
+</p>
 
