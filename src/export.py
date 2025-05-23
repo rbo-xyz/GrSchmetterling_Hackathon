@@ -7,6 +7,7 @@ from itertools import islice
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, A3
 import geopandas as gpd
+from shapely.geometry import Point
 # from import_gpx import import_gpx
 # from calculate import calc_leistungskm
 # import geopandas as gpd
@@ -61,6 +62,7 @@ def export_to_pdf(
     filename,
     geschwindigkeit,
     tot_dist,
+    tot_lkm,
     tot_hm_pos,
     tot_hm_neg,
     tot_marschzeit_h,
@@ -79,10 +81,12 @@ def export_to_pdf(
     for i, row in gdf_calc.iterrows():
         ort = row.get("von_pkt_name", f"Abschnitt {i+1}")
         nr = row.get("segment_id", i + 1)  # Fallback auf Index+1
-        hoehe = ""  # Kein Einzelhöhenwert vorhanden
+        hoehe = row.get("von_pkt_geom", i+1)
         hm = row.get("elevation", "")  # Annahme: elevation = Höhenmeter
         km = round(row.get("cumulative_km", 0), 2)
         lkm = round(row.get("Leistungskm [km]", 0), 2)
+
+        hoehe = int(round(hoehe.z,0))
 
         # Marschzeit als hh:mm
         marschzeit_min = int(row.get("Marschzeit [min]", 0))
@@ -91,17 +95,6 @@ def export_to_pdf(
         pause = row.get("Hinweis", "")  # Hinweis existiert evtl. nicht
 
         data.append((ort, nr, hoehe, hm, km, lkm, zeit_str, "", "", "", "", pause))
-
-
-    #TODO
-    bemerkung_data = ["Bemerkungen"]  # First entry is the header
-    for i in range(1, len(data)):
-        if i % 5 == 0:
-            bemerkung_data.append("Rastplatz mit Aussicht")
-        elif i % 3 == 0:
-            bemerkung_data.append("Weg schlecht markiert")
-        else:
-            bemerkung_data.append("–")
 
     c = canvas.Canvas(filename, pagesize=A4)
     w, h = A4
@@ -290,12 +283,12 @@ def export_to_pdf(
             c.line(x, third_table_y_top, x, third_table_y_top - third_table_height)
 
         # Draw rotated text
-        vertical_labels = ["Höhendifferenz in 100m*", 
+        vertical_labels = ["Höhendifferenz in 100m", 
                            "Horizontaldistanz", 
-                           "Leistungskilometer**", 
+                           "Leistungskilometer*", 
                            "Marschszeit", 
                            "Distanz", 
-                           "Leistungskilometer**", 
+                           "Leistungskilometer*", 
                            "Geplante Zeit", 
                            "Tatsächliche Zeit", 
                            "Pausen"]
@@ -317,7 +310,7 @@ def export_to_pdf(
 
 
         # --- Eighth table: 1 row, 3 columns, below main table ---
-        bottom_table_col_widths = [180, 180, 200]
+        bottom_table_col_widths = [112, 112, 112, 112, 112]
         bottom_table_x = [xlist[0]]
         for width in bottom_table_col_widths:
             bottom_table_x.append(bottom_table_x[-1] + width)
@@ -335,9 +328,11 @@ def export_to_pdf(
             c.line(x, bottom_table_y_top, x, bottom_table_y_bottom)
 
         # Dummy text for cells
-        bottom_table_values = [f"TOTAL Marschzeit ohne Pausen: {tot_marschzeit_h}:{tot_marschzeit_min} h",
-                                f"Positiver Höhenunterschied: {tot_hm_pos} m",
-                                  f"Negativer Höhenunterschied: {tot_hm_neg} m"]
+        bottom_table_values = [f"Zeit ohne Pausen: {tot_marschzeit_h}:{tot_marschzeit_min} h",
+                                f"Pos. Höhendiff: {tot_hm_pos} m",
+                                  f"Neg. Höhendiff: {tot_hm_neg} m",
+                                   f"Tot. Distanz: {tot_dist}",
+                                    f"Tot. Lkm: {tot_lkm}"]
         for i, text in enumerate(bottom_table_values):
             x_left = bottom_table_x[i]
             x_right = bottom_table_x[i + 1]
@@ -379,15 +374,12 @@ def export_to_pdf(
                     text_obj.setFont("Helvetica-Bold", 9)
                     text_obj.textLine("BEMERKUNGEN")
                     text_obj.setFont("Helvetica", 9)
-                    text_obj.textLine("* Höhenmeter direkt")
-                    text_obj.textLine("  in Hektometer notieren")
-                    text_obj.textLine("  (1 hm = 100 m)")
-                    text_obj.textLine("** Leistungskilometer:")
+                    text_obj.textLine("* Leistungskilometer:")
                     text_obj.textLine("   Distanz (in km) +")
                     text_obj.textLine("   Steigung (in hm)")
                     c.drawText(text_obj)
                 else:
-                    bemerkung_text = str(bemerkung_data[row_index]) if row_index < len(bemerkung_data) else ""
+                    bemerkung_text = ""
                     text_y2 = ylist_second[row_index] - row_height + (row_height - fontsize) / 2 + 2
                     c.setFont("Helvetica", fontsize)
                     c.drawString(second_grid_xlist[0] + 2, text_y2, bemerkung_text)
