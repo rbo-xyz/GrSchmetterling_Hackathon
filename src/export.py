@@ -13,6 +13,7 @@ from shapely.geometry import Point
 # import geopandas as gpd
 # import pandas as pd
 from datetime import timedelta
+from src.maps import draw_scaled_image
 
 # More Dummy data for testing
 # filename = "marschzeit-grid.pdf"                                    # exists
@@ -396,7 +397,13 @@ def export_to_pdf(
                     c.drawString(second_grid_xlist[0] + 2, text_y2, bemerkung_text)
 
 
+
+
+        draw_scaled_image(c, "C://temp_schmetterling/elevation.png", x=40, y=420, max_width=500)
+
         c.showPage()
+
+    draw_scaled_image(c, "C://temp_schmetterling/map.png", x=40, y=40, max_width=w-50)
 
     c.save()
 
