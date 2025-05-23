@@ -5,7 +5,7 @@
 from src.calculate import calc_leistungskm
 from src.import_gpx import import_gpx
 from src.maps import generate_elevation_plot 
-from src.MICHI import export_to_pdf
+from src.export import export_to_pdf
 from src.gdf_show import show
 
 #import Module
@@ -173,7 +173,7 @@ class MarschzeitBerechnung(QWidget):
         print(self.input_ersteller)
         print(self.input_erstellerdatum)
 
-        # export_to_pdf(self.gdf_calc, self.filename_s,self.input_geschwindigkeit, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min, self.input_titel, self.input_ersteller, self.input_erstellerdatum)
+        export_to_pdf(self.gdf_calc, self.filename_s,self.input_geschwindigkeit, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min, self.input_titel, self.input_ersteller, self.input_erstellerdatum)
         print("Export wurde ausgeführt")
 
 if __name__ == "__main__":
