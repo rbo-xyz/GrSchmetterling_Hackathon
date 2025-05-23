@@ -19,11 +19,15 @@ transformer = Transformer.from_crs("EPSG:4326", "EPSG:2056", always_xy=True)
 
 def import_gpx(filepath: str):
     
-    ## Filepath vorhanden
-    if not os.path.isfile(filepath):
-        raise FileNotFoundError(f"Datei '{filepath}' wurde nicht gefunden.")
-
-    
+    ## Fehlerbehandlung wird nicht mehr benötigt
+    # ## Filepath vorhanden
+    # if not os.path.isfile(filepath):
+    #     raise FileNotFoundError(f"Datei '{filepath}' wurde nicht gefunden.")
+    # ## Filepath ist lesbar
+    # try:
+    #     ET.parse(filepath)
+    # except ET.ParseError as e:
+    #     raise ValueError(f"Datei '{filepath}' ist kein gültiges XML/GPX: {e}")
 
     ## Check Source
     source = identify_source(filepath)
@@ -34,7 +38,8 @@ def import_gpx(filepath: str):
     if source == "web":
         gdf = import_web(filepath)
     if source == "unknown":
-        raise ValueError(f"Datei '{filepath}' ist weder von der Swisstopo-App noch vom Siwsstopo-GIS erstellt worden.")
+        pass
+        # raise ValueError(f"Datei '{filepath}' ist weder von der Swisstopo-App noch vom Siwsstopo-GIS erstellt worden.")
 
     return gdf
 

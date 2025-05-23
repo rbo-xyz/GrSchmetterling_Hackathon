@@ -3,7 +3,7 @@
 
 #import Files für Berechnung
 from src.calculate import calc_leistungskm
-from src.import_gpx import import_gpx
+from src.import_gpx import import_gpx, identify_source
 from src.maps import generate_elevation_plot 
 from src.export import export_to_pdf
 from src.gdf_show import show
@@ -76,12 +76,17 @@ class MarschzeitBerechnung(QWidget):
             QMessageBox.critical(self, "Fehler", "Bitte laden Sie zuerst eine GPX-Datei.")
             return  # Berechnung abbrechen
         else:
-            #import der GPS Datei über den Importer
-            ## Filepath ist lesbar
+            #import der GPX Datei über den Importer
+
+            ## Prüfung ob das File dem Stansard entspricht um programmabsturz zu vermeiden
             try:
                 ET.parse(self.filename_i)
             except ET.ParseError as e:
                 QMessageBox.critical(self, "Ungültige Eingabe", "Das File ist nicht lesbar.")
+
+            ## Prüfung ob File von Siwsstopo um programmabsturz zu vermeiden
+            if identify_source(self.filename_i) == "unknown":
+                QMessageBox.critical(self, "Ungültige Eingabe", "Das File ist nicht mit den Tools der swisstopo erstellt worden.")
             
             self.gdf_imp = import_gpx(self.filename_i)
             print("Import wurde ausgeführt")
