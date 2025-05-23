@@ -87,7 +87,8 @@ class MarschzeitBerechnung(QWidget):
             ## Prüfung ob File von Siwsstopo um programmabsturz zu vermeiden
             if identify_source(self.filename_i) == "unknown":
                 QMessageBox.critical(self, "Ungültige Eingabe", "Das File ist nicht mit den Tools der swisstopo erstellt worden.")
-            
+                return
+
             self.gdf_imp = import_gpx(self.filename_i)
             print("Import wurde ausgeführt")
 
