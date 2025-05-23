@@ -11,7 +11,7 @@ from src.gdf_show import show
 #import Module
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QMessageBox,QGraphicsScene,QTableWidget, QTableWidgetItem 
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, QDate
 from PyQt5.QtGui import QPixmap, QIcon
 import sys
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -27,6 +27,7 @@ class MarschzeitBerechnung(QWidget):
         self.setWindowIcon(QIcon("icons/logo.png"))
         self.setWindowTitle("Marschzeitberechnung")
         self.setMinimumSize(1000, 800)
+        self.dateEditDatum.setDate(QDate.currentDate())
 
         # Button Verbindungen
         
@@ -34,7 +35,7 @@ class MarschzeitBerechnung(QWidget):
         self.pushButtonCalculate.clicked.connect(self.calculate)
         self.pushButtonExportPDF.clicked.connect(self.export_pdf)
 
-        #Line Edits
+        
         
         
 
@@ -70,11 +71,11 @@ class MarschzeitBerechnung(QWidget):
             #progressbar Value auf 50% setzen
             self.progressBar.setValue(50)
 
+
             # Zugriff auf die Meta-Informationen aus dem UI (hier eingesetzt, da die Variablen abgefüllt sein müssen!)
             self.input_titel = self.lineEditTitel.text().strip()
-            
+            #Abrage ob Geschwindikeit eingegeben wurde um Programmabsturz zu vermeiden
             try:
-                #Abrage ob Geschwindikeit eingegeben wurde um Programmabsturz zu vermeiden
                 self.input_geschwindigkeit = float(self.lineEditSpeed.text().strip())
             except ValueError:
                 QMessageBox.critical(self, "Ungültige Eingabe", "Bitte eine gültige Geschwindigkeit in km/h eingeben.")
@@ -82,10 +83,11 @@ class MarschzeitBerechnung(QWidget):
             self.input_ersteller = self.lineEditErsteller.text().strip()
             self.input_erstellerdatum = self.dateEditDatum.date().toString("dd.MM.yyyy")
 
+
             # Berechnung der Leistungskilometer, Marschzeit, Distanz und Höhenmeter
             self.gdf_calc, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min = calc_leistungskm(self.gdf_imp, self.input_geschwindigkeit)
             print("Berechnung wurde ausgeführt")
-            self.gdf_calc.to_csv("test_2.csv")
+            # self.gdf_calc.to_csv("test_2.csv")
 
 
             #progressbar Value auf 75% setzen
