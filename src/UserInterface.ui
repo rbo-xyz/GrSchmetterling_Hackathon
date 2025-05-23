@@ -80,6 +80,41 @@
       <item row="0" column="3">
        <widget class="QLineEdit" name="lineEditSpeed"/>
       </item>
+      <item row="0" column="4">
+       <widget class="QComboBox" name="comboBoxExportFormat">
+        <property name="toolTip">
+         <string>Exportformat (Papierformat) wählen</string>
+        </property>
+        <item>
+         <property name="text">
+          <string>A5</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>A4</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>A3</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>A2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>A1</string>
+         </property>
+        </item>
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0">
        <widget class="QLabel" name="labelErsteller">
         <property name="text">
@@ -177,15 +212,12 @@
      </property>
     </widget>
    </item>
-   <!-- NEU: GroupBox für das Höhenprofil -->
    <item>
     <widget class="QGroupBox" name="groupBoxHoehenprofil">
      <property name="title">
       <string>Höhenprofil</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayoutHoehenprofil">
-      <!-- Leer, wird im Python-Code mit dem Canvas gefüllt -->
-     </layout>
+     <layout class="QVBoxLayout" name="verticalLayoutHoehenprofil"/>
     </widget>
    </item>
   </layout>

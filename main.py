@@ -187,18 +187,11 @@ class MarschzeitBerechnung(QWidget):
                                                    "PDF (*.PDF)")
         #progressbar Value auf 30 setzen
         self.progressBar.setValue(30)
-        print(self.filename_s)
-        print(self.input_geschwindigkeit)
-        print(self.tot_dist)
-        print(self.tot_hm_pos)
-        print(self.tot_hm_neg)
-        print(self.tot_marschzeit_h)
-        print(self.tot_marschzeit_min)
-        print(self.input_titel)
-        print(self.input_ersteller)
-        print(self.input_erstellerdatum)
 
-        export_to_pdf(self.gdf_calc, self.filename_s,self.input_geschwindigkeit, self.tot_dist, self.tot_lkm, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min, self.input_titel, self.input_ersteller, self.input_erstellerdatum)
+        # Abfrage des Exportformats aus dem Droppdown Menü
+        self.export_format = self.comboBoxExportFormat.currentText()
+
+        export_to_pdf(self.gdf_calc, self.filename_s,self.input_geschwindigkeit, self.tot_dist, self.tot_lkm, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min, self.input_titel, self.input_ersteller, self.input_erstellerdatum, self.export_format)
         
         #progressbar Value auf 90 setzen
         self.progressBar.setValue(90)
