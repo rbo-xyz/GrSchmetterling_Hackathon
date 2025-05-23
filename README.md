@@ -52,8 +52,8 @@ Auf https://api3.geo.admin.ch/rest/services sind maximal Abfragen mit 5000 Zeich
 
 ## Route erstellen
 Auf [Geo Admin](https://map.geo.admin.ch/) im Register "Zeichnen & Messen auf Karte" kann mit dem Tool Linie die Wanderroute eingezeichnet werden.
-Tipp: Mehrere Linien pro Route sind erlaubt.
+*Tipp:* Mehrere Linien pro Route sind erlaubt.
 
 Mit dem Tool Symbol können die Einzelnen Wegpunkte platziert werden. Anschliessend im Fenster, dass sich geöffnet hat kann im Feld Text kann ein Name angegeben werden. <br/>
-Tipp durch anklicken des Symbols kann das Fenster wieder geöffnet werden. Die Wegpunkte werden bei der Berechnung, automatisch auf den nächsten Punkt auf der Linie verschoben.
+*Tipp:* durch anklicken des Symbols kann das Fenster wieder geöffnet werden. Die Wegpunkte werden bei der Berechnung, automatisch auf den nächsten Punkt auf der Linie verschoben.
 
