@@ -31,7 +31,7 @@ def generate_elevation_plot(df):
     ax.fill_between(dists, elevations, color='yellow', alpha=0.5)
     ax.set_xlabel("Distanz (km)")
     ax.set_ylabel("Höhe (m ü. M.)")
-    ax.set_title("Höhenprofil 🦋")
+    ax.set_title("Höhenprofil")
     ax.grid(True)
     fig.tight_layout()
     return fig
