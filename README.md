@@ -59,6 +59,8 @@ Mit dem Tool Symbol können die Einzelnen Wegpunkte platziert werden. Anschliess
 
 Über das Dropdown bei Export kann ein **GPX** exportiert werden.
 
-##Verwendung des Marschzeitberechungs Tool
+
+
+## Verwendung des Marschzeitberechungs Tool
 
 
