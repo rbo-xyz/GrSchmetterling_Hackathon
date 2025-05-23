@@ -10,6 +10,7 @@ from shapely.geometry import Point, LineString, MultiPoint, MultiLineString, map
 from shapely.ops import linemerge, split, substring
 import gpxpy
 from pyproj import Transformer
+from collections import defaultdict, deque
 
 transformer = Transformer.from_crs("EPSG:4326", "EPSG:2056", always_xy=True)
 
@@ -46,16 +47,16 @@ def import_gpx(filepath: str):
 
 def identify_source(filepath: str):
     """
-    Liest eine GPX-Datei ein und gibt zurück,
-    ob sie mit der Swisstopo-App oder via Web (OpenLayers) erstellt wurde.
+    Liest eine GPX-Datei ein und gibt zurück, ob sie mit der Swisstopo-App oder via Web (OpenLayers) erstellt wurde.
 
-    Eingabe:
-        - filepath: Pfad zur GPX-Datei
+    Parameter:
+        filepath (str): Pfad zur GPX-Datei.
 
     Rückgabe:
-        - 'app' für Swisstopo App
-        - 'web' für Web-Export (OpenLayers)
-        - 'unknown' falls weder eindeutig noch lesbar
+        str: 
+            - 'app' für Swisstopo App
+            - 'web' für Web-Export (OpenLayers)
+            - 'unknown' falls weder eindeutig noch lesbar
     """
 
     XSI = "http://www.w3.org/2001/XMLSchema-instance"
@@ -77,7 +78,16 @@ def identify_source(filepath: str):
 
 def import_app(filepath: str):
     """
-    Importiert GPX-Datei, die mit der Swisstopo-App erstellt wurde.
+    Importiert eine GPX-Datei, die mit der Swisstopo-App erstellt wurde, und gibt ein GeoDataFrame mit segmentierten Strecken und Waypoints zurück.
+
+    Die Funktion liest die Waypoints und Tracks aus der GPX-Datei, transformiert die Koordinaten ins LV95-Referenzsystem (EPSG:2056) und erstellt 3D-LineStrings für die Streckensegmente.
+    Anschließend werden die Segmente und Waypoints zu einem GeoDataFrame zusammengeführt, das für weitere Analysen genutzt werden kann.
+
+    Parameter:
+        filepath (str): Pfad zur GPX-Datei.
+
+    Rückgabe:
+        gpd.GeoDataFrame: GeoDataFrame mit segmentierten Strecken und zugehörigen Waypoints im LV95-Koordinatensystem.
     """
     ## Erstellung Waypoints GeoDataFrame
     gdf_waypoints = gpd.read_file(filepath, layer="waypoints", driver="GPX")
@@ -123,6 +133,18 @@ def import_app(filepath: str):
 ## <---------------------------------------------------------------------------------------------------------------->
 
 def import_web(filepath: str):
+    """
+    Importiert eine GPX-Datei, die mit dem Swisstopo-Web-GIS (OpenLayers) erstellt wurde, und gibt ein GeoDataFrame mit segmentierten Strecken und Waypoints zurück.
+
+    Die Funktion liest die Waypoints und Routen aus der GPX-Datei, transformiert die Koordinaten ins LV95-Referenzsystem (EPSG:2056) und erstellt 3D-LineStrings für die Streckensegmente.
+    Die Höhen werden dabei über die Swisstopo-API abgefragt. Anschließend werden die Segmente und Waypoints zu einem GeoDataFrame zusammengeführt, das für weitere Analysen genutzt werden kann.
+
+    Parameter:
+        filepath (str): Pfad zur GPX-Datei.
+
+    Rückgabe:
+        gpd.GeoDataFrame: GeoDataFrame mit segmentierten Strecken und zugehörigen Waypoints im LV95-Koordinatensystem.
+    """
     ## Erstellung Waypoints GeoDataFrame
     gdf_waypoints = gpd.read_file(filepath, layer="waypoints", driver="GPX")
     gdf_waypoints['id'] = range(1, len(gdf_waypoints)+1)
@@ -201,6 +223,25 @@ def import_web(filepath: str):
 
 def combine_waypoints_lines(gdf_lines: gpd.GeoDataFrame,
                             gdf_waypoints: gpd.GeoDataFrame):
+    """
+    Verknüpft Liniensegmente (GeoDataFrame) mit den zugehörigen Start- und End-Waypoints und gibt ein sortiertes GeoDataFrame zurück.
+
+    Die Funktion ordnet jedem Liniensegment die Namen und Geometrien der zugehörigen Start- und End-Waypoints zu, basierend auf der räumlichen Nähe.
+    Anschließend wird das Ergebnis-GeoDataFrame topologisch sortiert, sodass die Segmente in der richtigen Reihenfolge von Start- zu Endpunkt angeordnet sind.
+
+    Parameter:
+        gdf_lines (gpd.GeoDataFrame): GeoDataFrame mit Liniensegmenten (Spalten: 'id', 'geometry').
+        gdf_waypoints (gpd.GeoDataFrame): GeoDataFrame mit Waypoints (Spalten: 'id', 'name', 'geometry').
+
+    Rückgabe:
+        gpd.GeoDataFrame: Sortiertes GeoDataFrame mit folgenden Spalten:
+            - segment_id: ID des Segments
+            - von_pkt_name: Name des Start-Waypoints
+            - von_pkt_geom: Geometrie des Start-Waypoints
+            - bis_pkt_name: Name des End-Waypoints
+            - bis_pkt_geom: Geometrie des End-Waypoints
+            - segment_geom: Geometrie des Liniensegments
+    """
 
     ## Lines GeoDataFrame unbennene und angleichen an Waypoints GeoDataFrame
     gdf = (
@@ -278,8 +319,6 @@ def combine_waypoints_lines(gdf_lines: gpd.GeoDataFrame,
     # gdf_sorted['segment_id'] = gdf_sorted.index + 1
     # gdf_sorted = gdf_sorted.set_geometry('segment_geom')
 
-    from collections import defaultdict, deque
-
     ## Herausfinden von Start und Endpunkt
     all_vons = set(out['von_pkt_name'])
     all_bis  = set(out['bis_pkt_name'])
@@ -319,6 +358,15 @@ def combine_waypoints_lines(gdf_lines: gpd.GeoDataFrame,
 ## <---------------------------------------------------------------------------------------------------------------->
 
 def to_3d_Point(pt: Point):
+    """
+    Wandelt einen 2D-Shapely-Point (LV95) in einen 3D-Point um, indem die Höhe über die Swisstopo-API abgefragt wird.
+
+    Parameter:
+        pt (Point): 2D-Shapely-Point mit X (Easting) und Y (Northing) im LV95-Koordinatensystem.
+
+    Rückgabe:
+        Point: 3D-Shapely-Point mit X, Y und abgefragtem Z (Höhe in Meter).
+    """
     z = get_height(pt.x, pt.y)
     return Point(pt.x, pt.y, z) 
 
@@ -329,8 +377,20 @@ def get_height(easting: float,
                northing: float, 
                max_retries: int = 3):
     """
-    Fragt die Höhe für einen Punkt (in LV95) bei der Swisstopo-API ab
-    und gibt sie als float zurück.
+    Fragt die Höhe (Z-Koordinate) für einen Punkt im LV95-Koordinatensystem über die Swisstopo-API ab.
+
+    Die Funktion sendet eine Anfrage an die Swisstopo-Höhen-API und gibt die Höhe als float zurück. Bei Verbindungsproblemen wird die Anfrage bis zu 'max_retries'-mal wiederholt.
+
+    Parameter:
+        easting (float): Rechtswert (X) im LV95-Koordinatensystem.
+        northing (float): Hochwert (Y) im LV95-Koordinatensystem.
+        max_retries (int, optional): Maximale Anzahl an Wiederholungsversuchen bei Fehlern (Standard: 3).
+
+    Rückgabe:
+        float: Höhe (Meter über Meer) am angegebenen Punkt.
+
+    Raises:
+        requests.HTTPError: Wenn nach allen Versuchen keine erfolgreiche Antwort von der API erhalten wurde.
     """
     HEIGHT_URL = "https://api3.geo.admin.ch/rest/services/height"
     params = {"easting": easting, "northing": northing}
@@ -345,7 +405,19 @@ def get_height(easting: float,
 
 def densify(linestring: LineString, 
             interval: float = 100.0):
-    
+    """
+    Fügt einem LineString zusätzliche Stützpunkte in regelmäßigen Abständen hinzu und gibt einen neuen, dichter besetzten LineString zurück.
+
+    Die Funktion interpoliert entlang des gegebenen LineStrings zusätzliche Punkte im angegebenen Intervall (in Metern), sodass die resultierende Linie aus den ursprünglichen und den neuen Stützpunkten besteht.
+
+    Parameter:
+        linestring (LineString): Ursprünglicher 2D-LineString.
+        interval (float, optional): Abstand (in Metern) zwischen den interpolierten Punkten (Standard: 100.0).
+
+    Rückgabe:
+        LineString: Neuer LineString mit dichter gesetzten Stützpunkten.
+    """
+
     total_len = linestring.length
     orig_dists = [linestring.project(Point(x, y)) for x, y in linestring.coords]
     regular_dists = list(np.arange(0, total_len, interval))
@@ -359,7 +431,17 @@ def densify(linestring: LineString,
 ## <---------------------------------------------------------------------------------------------------------------->
 
 def to_3d_linestring(line2d: LineString):
+    """
+    Wandelt einen 2D-LineString in einen 3D-LineString um, indem für jeden Stützpunkt die Höhe über die Swisstopo-API abgefragt wird.
 
+    Für jede Koordinate des übergebenen 2D-LineStrings wird die entsprechende Höhe (Z-Wert) ermittelt und ein neuer 3D-LineString erzeugt.
+
+    Parameter:
+        line2d (LineString): Ursprünglicher 2D-LineString im LV95-Koordinatensystem.
+
+    Rückgabe:
+        LineString: 3D-LineString mit X, Y und abgefragtem Z (Höhe in Meter) für jeden Stützpunkt.
+    """
     coords2d = list(line2d.coords)
     coords3d = []
     for x, y in coords2d:
@@ -412,8 +494,23 @@ def to_3d_linestring_profile(line2d: LineString,
                              which: str = "COMB",
                              max_geom_chars: int = 3000):
     """
-    Baut ein 3D-Linestring auf, auch wenn der ursprüngliche 2D-Linestring
-    (im GeoJSON-Parameter) zu lang für einen einzigen GET-Request wäre.
+    Wandelt einen 2D-LineString in einen 3D-LineString um, indem das Höhenprofil über die Swisstopo-Profile-API abgefragt wird.
+
+    Die Funktion prüft, ob der GeoJSON-String des LineStrings zu lang für einen einzelnen API-Request ist. Falls ja, wird der LineString rekursiv in kleinere Abschnitte unterteilt und die API mehrfach aufgerufen. Die resultierenden 3D-Segmente werden anschließend zu einem vollständigen 3D-LineString zusammengefügt.
+
+    Parameter:
+        line2d (LineString): Ursprünglicher 2D-LineString im LV95-Koordinatensystem.
+        crs (int, optional): EPSG-Code des Koordinatensystems (Standard: 2056).
+        offset (int | None, optional): Optionaler Offset für die Profilabfrage.
+        distinct_points (bool, optional): Ob nur unterschiedliche Punkte abgefragt werden sollen (Standard: True).
+        which (str, optional): Höhenmodell, das verwendet werden soll (z.B. "COMB", "DTM", "DSM").
+        max_geom_chars (int, optional): Maximale Länge des GeoJSON-Strings pro API-Request (Standard: 3000).
+
+    Rückgabe:
+        LineString: 3D-LineString mit X, Y und abgefragtem Z (Höhe in Meter) für jeden Stützpunkt.
+
+    Raises:
+        requests.HTTPError: Wenn die API-Anfrage fehlschlägt.
     """
 
     ## Definition der Variabeln

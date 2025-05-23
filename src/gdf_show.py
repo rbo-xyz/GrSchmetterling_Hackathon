@@ -2,6 +2,18 @@ import geopandas as gpd
 import pandas as pd
 
 def show(gdf: gpd.GeoDataFrame):
+    """
+    Bereitet ein GeoDataFrame für die Anzeige in einer Benutzeroberfläche auf und gibt ein formatiertes DataFrame zurück.
+
+    Die Funktion wählt relevante Spalten aus, benennt sie um und rundet numerische Werte für eine übersichtliche Darstellung.
+    Zusätzlich wird eine leere Spalte 'Hinweis' hinzugefügt.
+
+    Parameter:
+        gdf (gpd.GeoDataFrame): GeoDataFrame mit Streckensegmenten und Attributen.
+
+    Rückgabe:
+        pd.DataFrame: Formatiertes DataFrame mit umbenannten und gerundeten Spalten für die Anzeige.
+    """
     # Rename and select required columns for the UI
     gdf_show = pd.DataFrame({
         'Abschnitt': gdf['segment_id'],
