@@ -3,9 +3,9 @@
 
 #import Files für Berechnung
 from src.calculate import calc_leistungskm
-from src.import_gpx import import_gpx
+from src.import_gpx import import_gpx, identify_source
 from src.maps import generate_elevation_plot 
-from src.MICHI import export_to_pdf
+from src.export import export_to_pdf
 from src.gdf_show import show
 
 #import Module
@@ -17,6 +17,7 @@ import sys
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import pandas as pd
+import xml.etree.ElementTree as ET
 
 
 
@@ -75,7 +76,18 @@ class MarschzeitBerechnung(QWidget):
             QMessageBox.critical(self, "Fehler", "Bitte laden Sie zuerst eine GPX-Datei.")
             return  # Berechnung abbrechen
         else:
-            #import der GPS Datei über den Importer
+            #import der GPX Datei über den Importer
+
+            ## Prüfung ob das File dem Stansard entspricht um programmabsturz zu vermeiden
+            try:
+                ET.parse(self.filename_i)
+            except ET.ParseError as e:
+                QMessageBox.critical(self, "Ungültige Eingabe", "Das File ist nicht lesbar.")
+
+            ## Prüfung ob File von Siwsstopo um programmabsturz zu vermeiden
+            if identify_source(self.filename_i) == "unknown":
+                QMessageBox.critical(self, "Ungültige Eingabe", "Das File ist nicht mit den Tools der swisstopo erstellt worden.")
+            
             self.gdf_imp = import_gpx(self.filename_i)
             print("Import wurde ausgeführt")
 
@@ -173,7 +185,7 @@ class MarschzeitBerechnung(QWidget):
         print(self.input_ersteller)
         print(self.input_erstellerdatum)
 
-        # export_to_pdf(self.gdf_calc, self.filename_s,self.input_geschwindigkeit, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min, self.input_titel, self.input_ersteller, self.input_erstellerdatum)
+        export_to_pdf(self.gdf_calc, self.filename_s,self.input_geschwindigkeit, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min, self.input_titel, self.input_ersteller, self.input_erstellerdatum)
         print("Export wurde ausgeführt")
 
 if __name__ == "__main__":
