@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'c:\Users\alexa\GrSchmeterling_Hackathon\src\UserInterface.ui'
+# Form implementation generated from reading ui file 'c:\Users\alexa\GrSchmeterling_Hackathon\src\UserInterface_2.ui'
 #
 # Created by: PyQt6 UI code generator 6.7.1
 #
@@ -12,7 +12,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_MarschzeitBerechnung(object):
     def setupUi(self, MarschzeitBerechnung):
         MarschzeitBerechnung.setObjectName("MarschzeitBerechnung")
-        MarschzeitBerechnung.resize(736, 700)
+        MarschzeitBerechnung.resize(800, 700)
         self.verticalLayout = QtWidgets.QVBoxLayout(MarschzeitBerechnung)
         self.verticalLayout.setObjectName("verticalLayout")
         self.groupBox = QtWidgets.QGroupBox(parent=MarschzeitBerechnung)
@@ -94,9 +94,11 @@ class Ui_MarschzeitBerechnung(object):
         self.labelSummary = QtWidgets.QLabel(parent=MarschzeitBerechnung)
         self.labelSummary.setObjectName("labelSummary")
         self.verticalLayout.addWidget(self.labelSummary)
-        self.graphicsViewProfil = QtWidgets.QGraphicsView(parent=MarschzeitBerechnung)
-        self.graphicsViewProfil.setObjectName("graphicsViewProfil")
-        self.verticalLayout.addWidget(self.graphicsViewProfil)
+        self.groupBoxHoehenprofil = QtWidgets.QGroupBox(parent=MarschzeitBerechnung)
+        self.groupBoxHoehenprofil.setObjectName("groupBoxHoehenprofil")
+        self.verticalLayoutHoehenprofil = QtWidgets.QVBoxLayout(self.groupBoxHoehenprofil)
+        self.verticalLayoutHoehenprofil.setObjectName("verticalLayoutHoehenprofil")
+        self.verticalLayout.addWidget(self.groupBoxHoehenprofil)
 
         self.retranslateUi(MarschzeitBerechnung)
         QtCore.QMetaObject.connectSlotsByName(MarschzeitBerechnung)
@@ -132,4 +134,4 @@ class Ui_MarschzeitBerechnung(object):
         item = self.tableWidget.horizontalHeaderItem(7)
         item.setText(_translate("MarschzeitBerechnung", "Hinweis"))
         self.labelSummary.setText(_translate("MarschzeitBerechnung", "Gesamtsumme: Distanz: 0.0 km | Hoehenmeter: 0 m | Marschzeit: 0 min"))
-        self.graphicsViewProfil.setToolTip(_translate("MarschzeitBerechnung", "Höhenprofil"))
+        self.groupBoxHoehenprofil.setTitle(_translate("MarschzeitBerechnung", "Höhenprofil"))
