@@ -29,3 +29,17 @@ PyQt5
 
 ## Show
 #alles drin
+
+
+geopandas
+shapely
+matplotlib
+contextily
+pandas
+numpy
+Pillow
+reportlab
+gpxpy
+pyproj
+requests
+PyQt5
