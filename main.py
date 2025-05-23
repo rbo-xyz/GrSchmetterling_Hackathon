@@ -83,10 +83,13 @@ class MarschzeitBerechnung(QWidget):
                 ET.parse(self.filename_i)
             except ET.ParseError as e:
                 QMessageBox.critical(self, "Ungültige Eingabe", "Das File ist nicht lesbar.")
+                self.progressBar.setValue(0)
+                return
 
             ## Prüfung ob File von Siwsstopo um programmabsturz zu vermeiden
             if identify_source(self.filename_i) == "unknown":
                 QMessageBox.critical(self, "Ungültige Eingabe", "Das File ist nicht mit den Tools der swisstopo erstellt worden.")
+                self.progressBar.setValue(0)
                 return
 
             self.gdf_imp = import_gpx(self.filename_i)
@@ -103,6 +106,7 @@ class MarschzeitBerechnung(QWidget):
                 self.input_geschwindigkeit = float(self.lineEditSpeed.text().strip())
             except ValueError:
                 QMessageBox.critical(self, "Ungültige Eingabe", "Bitte eine gültige Geschwindigkeit in km/h eingeben.")
+                self.progressBar.setValue(0)
                 return
             self.input_ersteller = self.lineEditErsteller.text().strip()
             self.input_erstellerdatum = self.dateEditDatum.date().toString("dd.MM.yyyy")
