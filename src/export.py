@@ -393,7 +393,15 @@ def export_to_pdf(
 
 
 
-        draw_scaled_image(c, "C://temp_schmetterling/elevation.png", x=0, y=0, max_width=500)
+        bottom_table_y_bottom = ylist[len(rows)] - row_height  # Etwas Puffer
+
+        draw_scaled_image(
+            c,
+            "C://temp_schmetterling/elevation.png",
+            x=40,
+            y=bottom_table_y_bottom - 200,  # Dynamisch angepasst: genug Platz
+            max_width=550
+        )
 
         c.showPage()
         # Start page numbr 2
@@ -402,7 +410,7 @@ def export_to_pdf(
 
 
         # Größe abfragen
-        draw_scaled_image(c, "C://temp_schmetterling/map.png", x=40, y=40, max_width=700)
+        draw_scaled_image(c, "C://temp_schmetterling/map.png", x=-50, y=200, max_width=1700)
         c.showPage()
 
         # if os.path.exists(image_path):
