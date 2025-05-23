@@ -18,6 +18,8 @@ import contextily as ctx
 import pandas as pd
 import numpy as np
 
+import os
+
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 
@@ -205,7 +207,15 @@ def generate_route_map(df):
 
     ax.tick_params(left=False, bottom=False, labelleft=False, labelbottom=False)
 
-    return fig 
+
+    path ="C://temp_schmetterling"
+    if not os.path.exists(path):
+            os.mkdir(path)
+
+    path_file = os.path.join(path, "img.png")
+
+    fig.savefig(path_file, dpi=dpi, bbox_inches='tight')
+    plt.close(fig)
 
 def draw_scaled_image(c, img_path, x, y, max_width):
     img = Image.open(img_path)
