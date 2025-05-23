@@ -11,7 +11,7 @@ import geopandas as gpd
 # from calculate import calc_leistungskm
 # import geopandas as gpd
 # import pandas as pd
-# from datetime import timedelta
+from datetime import timedelta
 
 # More Dummy data for testing
 # filename = "marschzeit-grid.pdf"                                    # exists
@@ -73,22 +73,25 @@ def export_to_pdf(
     header = ("Ort, Flurname, Koordinaten", "Nr", "Höhe", "hm", "km", "Lkm", "h:mm", "", "", "", "", "Pause")
     data = [header]
 
+# ['segment_id', 'von_pkt_name', 'von_pkt_geom', 'bis_pkt_name', 'bis_pkt_geom', 
+#  'segment_geom', 'cumulative_km', 'elevation', 'Leistungskm [km]', 'Marschzeit [min]']
 
     for i, row in gdf_calc.iterrows():
-        ort = row["Von"] or f"Abschnitt {i+1}"
-        nr = row["Abschnitt"]
-        hoehe = ""  # Kein Höhenwert vorhanden
-        hm = row["Hoehenmeter [m]"]
-        km = row["Laenge [km]"]
-        lkm = row["Leistungskm"]
+        ort = row.get("von_pkt_name", f"Abschnitt {i+1}")
+        nr = row.get("segment_id", i + 1)  # Fallback auf Index+1
+        hoehe = ""  # Kein Einzelhöhenwert vorhanden
+        hm = row.get("elevation", "")  # Annahme: elevation = Höhenmeter
+        km = round(row.get("cumulative_km", 0), 2)
+        lkm = round(row.get("Leistungskm [km]", 0), 2)
 
         # Marschzeit als hh:mm
-        marschzeit_min = int(row["Marschzeit [min]"])
+        marschzeit_min = int(row.get("Marschzeit [min]", 0))
         zeit_str = str(timedelta(minutes=marschzeit_min))[:-3]  # 'hh:mm'
 
-        pause = row.get("Hinweis", "")
+        pause = row.get("Hinweis", "")  # Hinweis existiert evtl. nicht
 
         data.append((ort, nr, hoehe, hm, km, lkm, zeit_str, "", "", "", "", pause))
+
 
     #TODO
     bemerkung_data = ["Bemerkungen"]  # First entry is the header
