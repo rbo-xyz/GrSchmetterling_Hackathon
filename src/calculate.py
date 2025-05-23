@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 def calc_leistungskm (gdf: gpd.GeoDataFrame,
-                      pace: str = "4.0"):
+                      pace: float = 4.0):
     """
     Berechnet verschiedene Strecken- und Höhenmetriken sowie die Marschzeit für jedes Segment in einem GeoDataFrame.
 
@@ -35,11 +35,6 @@ def calc_leistungskm (gdf: gpd.GeoDataFrame,
             - tot_marschzeit_h (int): Marschzeit Stundenanteil
             - tot_marschzeit_min (int): Marschzeit Minutenanteil
     """
-
-    ## Convert string to int
-    pace_float = float(pace)
-
-
     for idx, row in gdf.iterrows():
         line = row.segment_geom
         
@@ -61,7 +56,7 @@ def calc_leistungskm (gdf: gpd.GeoDataFrame,
 
         # Marschzeitberechnung aus den Leistungskilometer
         # default Geschwindigkeit von 4km/h / wird übernommen durch Parameter pace
-        mz = round((leistungskm / pace_float ) * 60, 0) # in Minuten
+        mz = round((leistungskm / pace ) * 60, 0) # in Minuten
         # 
         # In Dataframe schreiben
         gdf.at[idx, 'cumulative_km'] = km
