@@ -62,5 +62,7 @@ Mit dem Tool Symbol können die Einzelnen Wegpunkte platziert werden. Anschliess
 
 
 ## Verwendung des Marschzeitberechungs Tool
-
+<p align="center">
+    <img src="data/Fenster_ausgefüllt.jpg" alt="Schmetterlings" width="400"/>
+</p>
 
