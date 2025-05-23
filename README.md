@@ -15,7 +15,7 @@ Mit Diesem Repo kann vom einrichten des Enviroments bis hin zur Nutzung zu verf√
 - [Anaconda Distribution](https://www.anaconda.com/products/distribution) oder [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
 
 ## Repository lokal klonen
-Mit Git in einem Terminal das GitHub Repository *Ticket to Escape* in ein lokales Verzeichnis klonen.
+Mit Git in einem Terminal das GitHub Repository *GrSchmeterling_Hackathon* in ein lokales Verzeichnis klonen.
 
 ``` shell
 cd /path/to/workspace
