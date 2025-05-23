@@ -4,7 +4,7 @@
 #import Files für Berechnung
 from src.calculate import calc_leistungskm
 from src.import_gpx import import_gpx, identify_source
-from src.maps import generate_elevation_plot 
+from src.maps import generate_elevation_plot, generate_route_map
 from src.export import export_to_pdf
 from src.gdf_show import show
 
@@ -155,6 +155,9 @@ class MarschzeitBerechnung(QWidget):
             self.toolbar = NavigationToolbar(self.canvas, self)
             layout.addWidget(self.toolbar)
             self.canvas.draw()
+
+            #generierung der Karte
+            generate_route_map(self.gdf_calc)
             
 
 

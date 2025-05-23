@@ -147,7 +147,9 @@ def generate_elevation_plot(df):
 
 
 def generate_route_map(df):
-    df['geometry'] = df['segment_geom'].apply(wkt.loads)
+    df['geometry'] = df['segment_geom'].apply(
+    lambda x: wkt.loads(x) if isinstance(x, str) else x
+    )
     gdf = gpd.GeoDataFrame(df, geometry='geometry', crs="EPSG:2056")
 
     start_points = gdf.copy()
