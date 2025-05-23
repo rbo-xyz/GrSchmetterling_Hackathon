@@ -36,7 +36,7 @@ class MarschzeitBerechnung(QWidget):
         
         # Zugriff auf die Meta-Informationen aus dem UI
         self.input_titel = self.lineEditTitel.text().strip()
-        self.input_geschwindigkeit = self.lineEditSpeed.text().strip()
+        self.input_geschwindigkeit = float(self.lineEditSpeed.text().strip())
         self.input_ersteller = self.lineEditErsteller.text().strip()
         self.input_erstellerdatum = self.dateEditDatum.date().toString("dd.MM.yyyy")
 
