@@ -142,7 +142,7 @@ def generate_elevation_plot(df):
 
     path_file = os.path.join(path, "elevation.png")
 
-    fig.savefig(path_file, bbox_inches='tight')
+    fig.savefig(path_file,dpi=300)
     return fig
 
 
@@ -223,7 +223,7 @@ def generate_route_map(df):
 
     path_file = os.path.join(path, "map.png")
 
-    fig.savefig(path_file, bbox_inches='tight')
+    fig.savefig(path_file,dpi=300)
     plt.close(fig)
 
 def draw_scaled_image(c, img_path, x, y, max_width):
