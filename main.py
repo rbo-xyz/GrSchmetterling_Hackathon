@@ -32,6 +32,15 @@ class MarschzeitBerechnung(QWidget):
         self.pushButtonCalculate.clicked.connect(self.calculate)
         self.pushButtonExportPDF.clicked.connect(self.export_pdf)
 
+        #Line Edits
+        
+        # Zugriff auf die Meta-Informationen aus dem UI
+        self.input_titel = self.lineEditTitel.text().strip()
+        self.input_geschwindigkeit = float(self.lineEditSpeed.text().strip())
+        self.input_ersteller = self.lineEditErsteller.text().strip()
+        self.input_erstellerdatum = self.dateEditDatum.date().toString("dd.MM.yyyy")
+
+
 
     #Funktionen für die Berechnung
 
@@ -64,7 +73,7 @@ class MarschzeitBerechnung(QWidget):
             self.progressBar.setValue(50)
 
             # Berechnung der Leistungskilometer, Marschzeit, Distanz und Höhenmeter
-            self.gdf_calc, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min = calc_leistungskm(self.gdf_imp)
+            self.gdf_calc, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min = calc_leistungskm(self.gdf_imp, self.input_geschwindigkeit)
             print("Berechnung wurde ausgeführt")
 
             #progressbar Value auf 75% setzen
@@ -72,6 +81,7 @@ class MarschzeitBerechnung(QWidget):
             
 
             #Darstellung des Dataframes im UI
+            #TODO
             self.tableWidget.setRowCount(len(self.gdf_calc))
             self.tableWidget.setColumnCount(len(self.gdf_calc.columns))
             self.tableWidget.setHorizontalHeaderLabels(self.gdf_calc.columns.tolist())
@@ -114,7 +124,18 @@ class MarschzeitBerechnung(QWidget):
                                                    "",
                                                    "PDF (*.PDF)")
         #TODO 
-        export_to_pdf(self.gdf_calc, self.filename_s)
+        print(self.filename_s)
+        print(self.input_geschwindigkeit)
+        print(self.tot_dist)
+        print(self.tot_hm_pos)
+        print(self.tot_hm_neg)
+        print(self.tot_marschzeit_h)
+        print(self.tot_marschzeit_min)
+        print(self.input_titel)
+        print(self.input_ersteller)
+        print(self.input_erstellerdatum)
+
+        # export_to_pdf(self.gdf_calc, self.filename_s,self.input_geschwindigkeit, self.tot_dist, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min, self.input_titel, self.input_ersteller, self.input_erstellerdatum)
         print("Export wurde ausgeführt")
 
 if __name__ == "__main__":
