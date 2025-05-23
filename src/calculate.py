@@ -6,7 +6,35 @@ import pandas as pd
 
 def calc_leistungskm (gdf: gpd.GeoDataFrame,
                       pace: float = 4.0):
-    
+    """
+    Berechnet verschiedene Strecken- und Höhenmetriken sowie die Marschzeit für jedes Segment in einem GeoDataFrame.
+
+    Für jedes Segment (LineString mit 3D-Koordinaten) werden folgende Werte berechnet und als neue Spalten im GeoDataFrame gespeichert:
+        - cumulative_km: Gesamtlänge des Segments in Kilometern
+        - elevation: Gesamte Höhendifferenz des Segments in Metern
+        - Leistungskm [km]: Leistungskilometer des Segments (Distanz + Höhenmeter)
+        - Marschzeit [min]: Marschzeit für das Segment in Minuten (basierend auf pace)
+
+    Zusätzlich werden folgende Gesamtwerte zurückgegeben:
+        - tot_dist: Gesamtdistanz aller Segmente in Kilometern
+        - tot_hm_pos: Summe aller positiven Höhenmeter
+        - tot_hm_neg: Summe aller negativen Höhenmeter
+        - tot_marschzeit_h: Gesamte Marschzeit (Stundenanteil)
+        - tot_marschzeit_min: Gesamte Marschzeit (Minutenanteil)
+
+    Parameter:
+        gdf (gpd.GeoDataFrame): GeoDataFrame mit einer Spalte 'segment_geom' (LineString mit 3D-Koordinaten)
+        pace (float): Geschwindigkeit in km/h (Standard: 4.0)
+
+    Returns:
+        Tuple:
+            - gdf (gpd.GeoDataFrame): GeoDataFrame mit neuen Spalten
+            - tot_dist (float): Gesamtdistanz in km
+            - tot_hm_pos (float): Summe positiver Höhenmeter
+            - tot_hm_neg (float): Summe negativer Höhenmeter
+            - tot_marschzeit_h (int): Marschzeit Stundenanteil
+            - tot_marschzeit_min (int): Marschzeit Minutenanteil
+    """
     for idx, row in gdf.iterrows():
         line = row.segment_geom
         
