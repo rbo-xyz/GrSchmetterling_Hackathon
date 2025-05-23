@@ -10,8 +10,6 @@ from reportlab.lib.units import inch
 import geopandas as gpd
 from shapely.geometry import Point
 from src.maps import generate_elevation_plot
-image_path = "data/wichtigesbild.png"
-img = Image.open(image_path)
 from reportlab.lib.utils import ImageReader
 from io import BytesIO
 # from import_gpx import import_gpx
@@ -294,7 +292,7 @@ def export_to_pdf(
             c.line(x, third_table_y_top, x, third_table_y_top - third_table_height)
 
         # Draw rotated text
-        vertical_labels = ["Höhendifferenz in 100m", 
+        vertical_labels = ["Höhendifferenz", 
                            "Horizontaldistanz", 
                            "Leistungskilometer*", 
                            "Marschszeit", 
@@ -395,39 +393,26 @@ def export_to_pdf(
 
 
 
-        draw_scaled_image(c, "C://temp_schmetterling/elevation.png", x=40, y=420, max_width=500)
+        draw_scaled_image(c, "C://temp_schmetterling/elevation.png", x=0, y=0, max_width=500)
 
         c.showPage()
         # Start page numbr 2
         # text = c.beginText(20, h - 20)  # Create a text object at (x=20, y=h - 20)
         # text.setFont("Helvetica", 9)
 
-        img2 = Image.open("C://temp_schmetterling//map.png")
 
         # Größe abfragen
-        breite2, hoh2 = img2.size
-
-        image_path2 = "C://temp_schmetterling//map.png"
-        img_reader = ImageReader(image_path2)#bild einfügen
-        c.drawImage(img_reader, 10, h - 500,  width = inch * 10, height = inch * 3)
-        # c.drawImage(img_reader, 0.02 * w, h - 0.84 * w, width = 0.67 * w, height = 0.42 * w)
-
-        # c.drawText(text)  # Draw the text object onto the canvas
+        draw_scaled_image(c, "C://temp_schmetterling/map.png", x=40, y=40, max_width=700)
         c.showPage()
 
-        img.close()
-        img2.close()
+        # if os.path.exists(image_path):
+        #     os.remove(image_path)
 
-        if os.path.exists(image_path):
-            os.remove(image_path)
+        # if os.path.exists(image_path2):
+        #     os.remove(image_path2)
 
-        if os.path.exists(image_path2):
-            os.remove(image_path2)
-
-        path = "C://temp_schmetterling"
-        if os.path.exists(path):
-            os.rmdir(path)
-
-    draw_scaled_image(c, "C://temp_schmetterling/map.png", x=40, y=40, max_width=w-50)
+        # path = "C://temp_schmetterling"
+        # if os.path.exists(path):
+        #     os.rmdir(path)
 
     c.save()

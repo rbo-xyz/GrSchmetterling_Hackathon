@@ -191,7 +191,7 @@ class MarschzeitBerechnung(QWidget):
         # Abfrage des Exportformats aus dem Droppdown Menü
         self.export_format = self.comboBoxExportFormat.currentText()
 
-        export_to_pdf(self.gdf_calc, self.filename_s,self.input_geschwindigkeit, self.tot_dist, self.tot_lkm, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min, self.input_titel, self.input_ersteller, self.input_erstellerdatum)
+        export_to_pdf(self.gdf_calc, self.filename_s,self.input_geschwindigkeit, self.tot_dist, self.tot_lkm, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min, self.input_titel, self.input_ersteller, self.input_erstellerdatum, self.export_format)
         
         #progressbar Value auf 90 setzen
         self.progressBar.setValue(90)
