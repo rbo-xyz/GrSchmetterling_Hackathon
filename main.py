@@ -18,6 +18,10 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import pandas as pd
 import xml.etree.ElementTree as ET
+import os
+import platform
+import subprocess
+
 
 
 
@@ -196,8 +200,21 @@ class MarschzeitBerechnung(QWidget):
 
         export_to_pdf(self.gdf_calc, self.filename_s,self.input_geschwindigkeit, self.tot_dist, self.tot_lkm, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min, self.input_titel, self.input_ersteller, self.input_erstellerdatum)
         
+        #progressbar Value auf 90 setzen
+        self.progressBar.setValue(90)
+
+        # PDF automatisch öffnen
+        if self.filename_s:
+            if platform.system() == 'Windows':
+                os.startfile(self.filename_s)
+            elif platform.system() == 'Darwin':  # macOS
+                subprocess.call(['open', self.filename_s])
+            else:  # Linux
+                subprocess.call(['xdg-open', self.filename_s])
+
         #progressbar Value auf 100 setzen
         self.progressBar.setValue(100)
+
         print("Export wurde ausgeführt")
 
 if __name__ == "__main__":
