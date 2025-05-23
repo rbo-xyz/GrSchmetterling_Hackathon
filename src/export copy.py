@@ -5,21 +5,16 @@ from PIL import Image
 from reportlab.lib.utils import ImageReader
 from itertools import islice
 from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4, A3
-from reportlab.lib.units import inch
+from reportlab.lib.pagesizes import A5, A4, A3, A2, A1, A0
 import geopandas as gpd
 from shapely.geometry import Point
-from src.maps import generate_elevation_plot
-image_path = "data/wichtigesbild.png"
-img = Image.open(image_path)
-from reportlab.lib.utils import ImageReader
-from io import BytesIO
 # from import_gpx import import_gpx
 # from calculate import calc_leistungskm
 # import geopandas as gpd
 # import pandas as pd
 from datetime import timedelta
-from src.maps import draw_scaled_image
+
+export_format=A4
 
 # More Dummy data for testing
 # filename = "marschzeit-grid.pdf"                                    # exists
@@ -51,6 +46,7 @@ from src.maps import draw_scaled_image
 #     'Hinweis': ""  # Add an empty 'Hinweis' column
 # })
 
+
 # Daten von main.py
 
 def grouper(iterable, n):
@@ -60,6 +56,8 @@ def grouper(iterable, n):
         if not chunk:
             break
         yield chunk
+
+
 
 def export_to_pdf(
     gdf_calc,
@@ -79,8 +77,10 @@ def export_to_pdf(
     
     header = ("Ort, Flurname, Koordinaten", "Nr", "Höhe", "hm", "km", "Lkm", "h:mm", "km", "Lkm", "h:mm", "h:mm", "h:mm")
     data = [header]
+
 # ['segment_id', 'von_pkt_name', 'von_pkt_geom', 'bis_pkt_name', 'bis_pkt_geom', 
 #  'segment_geom', 'cumulative_km', 'elevation', 'Leistungskm [km]', 'Marschzeit [min]']
+
     dist_moment = 0
     lkm_moment = 0
     time_moment = 0
@@ -110,18 +110,27 @@ def export_to_pdf(
 
         data.append((ort, nr, hoehe, hm, km, lkm, zeit_str, dist_moment, lkm_moment, zeit_str_moment, "", pause))
 
-    c = canvas.Canvas(filename, pagesize=A4)
-    w, h = A4
+    c = canvas.Canvas(filename, pagesize=export_format)
+    w, h = export_format
     max_rows_per_page = 45
 
     # Layout settings
-    x_offset = 20
-    y_offset = 250
-    row_height = 16
+    # x_offset = 20
+    # y_offset = 250
+    # row_height = 16
+    # third_table_height = row_height * 7  # Height of the third table
+
+    # # Table column widths
+    # col_widths = [130, 20, 30, 30, 30, 30, 30, 30, 30, 35, 35, 30]
+
+    x_offset = w * 0.035          # 3% of width
+    y_offset = h * 0.42          # 25% of height
+    row_height = h * 0.03       # 1.8% of height
     third_table_height = row_height * 7  # Height of the third table
 
-    # Table column widths
-    col_widths = [130, 20, 30, 30, 30, 30, 30, 30, 30, 35, 35, 30]
+    # Proportional column widths (adjust as needed)
+    col_widths = [w * 0.22, w * 0.035, w * 0.05, w * 0.05, w * 0.05,
+                w * 0.05, w * 0.05, w * 0.05, w * 0.05, w * 0.06, w * 0.06, w * 0.05]
 
     # Compute x positions for main table
     xlist = [x_offset]
@@ -141,7 +150,7 @@ def export_to_pdf(
 
     # Where to start second column (right of the main table)
     second_grid_x_start = xlist[-1] + 0  # leave a gap between tables
-    second_grid_width = 100
+    second_grid_width = w * 0.17
     second_grid_xlist = [second_grid_x_start, second_grid_x_start + second_grid_width]
 
     text_columns_left_aligned = [0, 12]  # "Ort" and "Bemerkung"
@@ -151,9 +160,10 @@ def export_to_pdf(
     for rows in grouper(data, max_rows_per_page):
         rows = tuple(filter(bool, rows))
 
+
         # --- sixth table ---
-        top_table_col_widths = [60, 120]  # adjustable
-        top_table_x = [20]  # start at the left side
+        top_table_col_widths = [0.1 * w, 0.2 * w]  # adjustable
+        top_table_x = [x_offset]  # start at the left side
         for width in top_table_col_widths:
             top_table_x.append(top_table_x[-1] + width)
 
@@ -185,10 +195,11 @@ def export_to_pdf(
             for j, line in enumerate(lines):
                 text_width = c.stringWidth(line, "Helvetica", 9)
                 c.drawString(cell_center_x - text_width / 2, start_y - j * 10, line)
+
     
         # --- seventh table (1 column, 2 rows, same position as sixth) ---
-        seventh_table_col_width = 180  # adjustable width
-        seventh_table_x = [20, 20 + seventh_table_col_width]
+        seventh_table_col_width = 0.3 * w  # adjustable width
+        seventh_table_x = [x_offset, x_offset + seventh_table_col_width]
 
         # Adjust the height: first row = 1x, second row = 3x
         seventh_table_row_heights = [row_height, row_height * 3]
@@ -228,9 +239,10 @@ def export_to_pdf(
             # Draw centered text
             c.drawString(cell_center_x - text_width / 2, text_y, text)
 
+
         # --- fifth table ---
-        top_table_col_widths = [60, 400, 100]  # adjustable
-        top_table_x = [20]  # start at the left side
+        top_table_col_widths = [0.1 * w, 0.67 * w, 0.17 * w]  # adjustable
+        top_table_x = [x_offset]  # start at the left side
         for width in top_table_col_widths:
             top_table_x.append(top_table_x[-1] + width)
 
@@ -255,8 +267,8 @@ def export_to_pdf(
             c.drawString(cell_center - text_width / 2, top_table_y_bottom + 4, text)
 
         # --- fouth table ---
-        top_table_col_widths = [120, 160, 100]  # adjustable
-        top_table_x = [200]  # start at the end of the main table
+        top_table_col_widths = [0.2 * w, 0.27 * w, 0.17 * w]  # adjustable
+        top_table_x = [0.335*w]  # start at the end of the main table
         for width in top_table_col_widths:
             top_table_x.append(top_table_x[-1] + width)
 
@@ -318,8 +330,10 @@ def export_to_pdf(
         # Draw main table
         c.grid(xlist, ylist[:len(rows) + 1]) # create number of rows
 
+
+
         # --- Eighth table: 1 row, 3 columns, below main table ---
-        bottom_table_col_widths = [112, 112, 112, 112, 112]
+        bottom_table_col_widths = [0.19 * w, 0.19 * w, 0.19 * w, 0.19 * w, 0.19 * w]
         bottom_table_x = [xlist[0]]
         for width in bottom_table_col_widths:
             bottom_table_x.append(bottom_table_x[-1] + width)
@@ -350,6 +364,7 @@ def export_to_pdf(
             text_width = c.stringWidth(text, "Helvetica", 9)
             c.drawString(cell_center - text_width / 2, bottom_table_y_bottom + 4, text)
 
+        
         # Draw second (single-column) grid
         c.grid(second_grid_xlist, ylist_second[:len(rows) + 1]) # create number of rows
 
@@ -393,41 +408,44 @@ def export_to_pdf(
                     c.drawString(second_grid_xlist[0] + 2, text_y2, bemerkung_text)
 
 
-
-
-        draw_scaled_image(c, "C://temp_schmetterling/elevation.png", x=40, y=420, max_width=500)
-
         c.showPage()
-        # Start page numbr 2
-        # text = c.beginText(20, h - 20)  # Create a text object at (x=20, y=h - 20)
-        # text.setFont("Helvetica", 9)
-
-        img2 = Image.open("C://temp_schmetterling//map.png")
-
-        # Größe abfragen
-        breite2, hoh2 = img2.size
-
-        image_path2 = "C://temp_schmetterling//map.png"
-        img_reader = ImageReader(image_path2)#bild einfügen
-        c.drawImage(img_reader, 10, h - 500,  width = inch * 10, height = inch * 3)
-        # c.drawImage(img_reader, 0.02 * w, h - 0.84 * w, width = 0.67 * w, height = 0.42 * w)
-
-        # c.drawText(text)  # Draw the text object onto the canvas
-        c.showPage()
-
-        img.close()
-        img2.close()
-
-        if os.path.exists(image_path):
-            os.remove(image_path)
-
-        if os.path.exists(image_path2):
-            os.remove(image_path2)
-
-        path = "C://temp_schmetterling"
-        if os.path.exists(path):
-            os.rmdir(path)
-
-    draw_scaled_image(c, "C://temp_schmetterling/map.png", x=40, y=40, max_width=w-50)
 
     c.save()
+
+
+
+# TODO Prepare data outside the function
+# header = ("Ort, Flurname, Koordinaten", "Nr", "Höhe", "hm", "km", "Lkm", "h:mm", "km", "Lkm", "hh:mm", "hh:mm", "Pause")
+# data = [header]
+# for i in range(1, 21):
+#     ort = f"Station {i}"
+#     hoehe = randint(1000, 2000)
+#     hm = randint(-200, 200)
+#     km1 = round(uniform(0.1, 5.0), 1)
+#     lkm1 = round(km1 + abs(hm) / 100, 2)
+#     zeit1 = f"{randint(0,1)}:{randint(0,59):02d}"
+#     km2 = round(uniform(0.1, 5.0), 1)
+#     lkm2 = round(km2 + abs(hm) / 120, 2)
+#     zeit2 = f"{randint(0,1)}:{randint(0,59):02d}"
+#     gesamt = f"{randint(0,5)}:{randint(0,59):02d}"
+#     pause = f"{randint(0,0)}:{randint(1,15):02d}"
+#     data.append((ort, i, hoehe, hm, km1, lkm1, zeit1, km2, lkm2, zeit2, gesamt, pause))
+
+
+
+# export_to_pdf(
+#     gdf_calc,
+#     filename,
+#     geschwindigkeit,
+#     tot_dist,
+#     tot_hm_pos,
+#     tot_hm_neg,
+#     tot_marschzeit_h,
+#     tot_marschzeit_min,
+#     titel,
+#     ersteller,
+#     erstellerdatum
+# )
+
+
+# os.startfile(filename)
