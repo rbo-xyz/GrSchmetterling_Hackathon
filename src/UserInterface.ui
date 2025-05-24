@@ -110,6 +110,31 @@
           <string>A1</string>
          </property>
         </item>
+                <item>
+         <property name="text">
+          <string>B4</string>
+         </property>
+        </item>
+                <item>
+         <property name="text">
+          <string>B3</string>
+         </property>
+        </item>
+                <item>
+         <property name="text">
+          <string>B2</string>
+         </property>
+        </item>
+                <item>
+         <property name="text">
+          <string>B1</string>
+         </property>
+        </item>
+                <item>
+         <property name="text">
+          <string>B0</string>
+         </property>
+        </item>
         <property name="currentIndex">
          <number>1</number>
         </property>
