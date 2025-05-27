@@ -1,0 +1,2 @@
+## Codeziele für pyinstaller
+pyinstaller main.py --onefile --windowed --hidden-import=rasterio.sample --name Marschzeitberechnung --icon=./icons/logo.ico
