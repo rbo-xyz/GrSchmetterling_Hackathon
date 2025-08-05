@@ -22,34 +22,38 @@ import os
 import platform
 import subprocess
 
+# UI aus .py-Datei importieren
+# from src.UserInterface_ui_embedded import Ui_MarschzeitBerechnung
 
 
-
-class MarschzeitBerechnung(QWidget):
+class MarschzeitFenster(QWidget):
     def __init__(self):
         super().__init__()
-        uic.loadUi("src/UserInterface.ui", self)  # UI laden
+        self.ui = uic.loadUi("src/UserInterface.ui", self)  # UI laden
+
+        # self.ui = Ui_MarschzeitBerechnung()
+        # self.ui.setupUi(self)
 
         self.setWindowIcon(QIcon("icons/logo.png"))
         self.setWindowTitle("Marschzeitberechnung")
         self.setMinimumSize(1000, 800)
         self.resize(1800, 1200)
-        self.dateEditDatum.setDate(QDate.currentDate())
+        self.ui.dateEditDatum.setDate(QDate.currentDate())
 
         #Matplotlib Figur initialisieren
         self.fig = None
 
-        if self.groupBoxHoehenprofil.layout() is None:
-            self.groupBoxHoehenprofil.setLayout(QVBoxLayout())
-        self.groupBoxHoehenprofil.setMinimumHeight(500)
+        if self.ui.groupBoxHoehenprofil.layout() is None:
+            self.ui.groupBoxHoehenprofil.setLayout(QVBoxLayout())
+        self.ui.groupBoxHoehenprofil.setMinimumHeight(500)
 
 
 
         # Button Verbindungen
         
-        self.pushButtonLoad.clicked.connect(self.laden)
-        self.pushButtonCalculate.clicked.connect(self.calculate)
-        self.pushButtonExportPDF.clicked.connect(self.export_pdf)
+        self.ui.pushButtonLoad.clicked.connect(self.laden)
+        self.ui.pushButtonCalculate.clicked.connect(self.calculate)
+        self.ui.pushButtonExportPDF.clicked.connect(self.export_pdf)
 
         
         
@@ -65,13 +69,13 @@ class MarschzeitBerechnung(QWidget):
                                                      "", 
                                                      "GPX-File (*.gpx)")
         #Abfüllen des Dateinamens in der UI
-        self.lineEditRoute.setText(self.filename_i)
+        self.ui.lineEditRoute.setText(self.filename_i)
         return self.filename_i
 
 
     def calculate(self):
         #progressbar Value auf 10 setzen
-        self.progressBar.setValue(10)
+        self.ui.progressBar.setValue(10)
 
         #Kontrolle ob eine Datei geladen wurde
         if not hasattr(self, 'filename_i') or not self.filename_i:
@@ -85,19 +89,19 @@ class MarschzeitBerechnung(QWidget):
                 ET.parse(self.filename_i)
             except ET.ParseError as e:
                 QMessageBox.critical(self, "Ungültige Eingabe", "Das File ist nicht lesbar.")
-                self.progressBar.setValue(0)
+                self.ui.progressBar.setValue(0)
                 return
 
             ## Prüfung ob File von Siwsstopo um programmabsturz zu vermeiden
             if identify_source(self.filename_i) == "unknown":
                 QMessageBox.critical(self, "Ungültige Eingabe", "Das File ist nicht mit den Tools der swisstopo erstellt worden.")
-                self.progressBar.setValue(0)
+                self.ui.progressBar.setValue(0)
                 return
 
             self.gdf_imp = import_gpx(self.filename_i)
 
             #progressbar Value auf 50% setzen
-            self.progressBar.setValue(50)
+            self.ui.progressBar.setValue(50)
 
 
             # Zugriff auf die Meta-Informationen aus dem UI (hier eingesetzt, da die Variablen abgefüllt sein müssen!)
@@ -107,7 +111,7 @@ class MarschzeitBerechnung(QWidget):
                 self.input_geschwindigkeit = float(self.lineEditSpeed.text().strip())
             except ValueError:
                 QMessageBox.critical(self, "Ungültige Eingabe", "Bitte eine gültige Geschwindigkeit in km/h eingeben.")
-                self.progressBar.setValue(0)
+                self.ui.progressBar.setValue(0)
                 return
             self.input_ersteller = self.lineEditErsteller.text().strip()
             self.input_erstellerdatum = self.dateEditDatum.date().toString("dd.MM.yyyy")
@@ -120,29 +124,29 @@ class MarschzeitBerechnung(QWidget):
 
 
             #progressbar Value auf 75% setzen
-            self.progressBar.setValue(75)
+            self.ui.progressBar.setValue(75)
             
 
             #Darstellung des Dataframes (als Tabelle) im UI
             self.gdf_show = show(self.gdf_calc)
-            self.tableWidget.setRowCount(len(self.gdf_show))
-            self.tableWidget.setColumnCount(len(self.gdf_show.columns))
-            self.tableWidget.setHorizontalHeaderLabels(self.gdf_show.columns.tolist())
+            self.ui.tableWidget.setRowCount(len(self.gdf_show))
+            self.ui.tableWidget.setColumnCount(len(self.gdf_show.columns))
+            self.ui.tableWidget.setHorizontalHeaderLabels(self.gdf_show.columns.tolist())
 
             for row_idx in range(len(self.gdf_show)):
                 for col_idx, col_name in enumerate(self.gdf_show.columns):
                     item = QTableWidgetItem(str(self.gdf_show.iloc[row_idx, col_idx]))
-                    self.tableWidget.setItem(row_idx, col_idx, item)
+                    self.ui.tableWidget.setItem(row_idx, col_idx, item)
             
 
             #progressbar Value auf 85% setzen
-            self.progressBar.setValue(85)
+            self.ui.progressBar.setValue(85)
 
             #Darstellung des Höhenprofils (interaktiv) im UI
             self.fig = generate_elevation_plot(self.gdf_calc)
         
 
-            layout = self.groupBoxHoehenprofil.layout()
+            layout = self.ui.groupBoxHoehenprofil.layout()
             while layout.count():
                 item = layout.takeAt(0)
                 widget = item.widget()
@@ -162,15 +166,15 @@ class MarschzeitBerechnung(QWidget):
 
 
             #progressbar Value auf 95% setzen
-            self.progressBar.setValue(95)
+            self.ui.progressBar.setValue(95)
             
 
             # Abfüllen der Summary im UI
-            self.labelSummary.setText(f"Gesamtsumme: Distanz: {self.tot_dist} km bzw. {self.tot_lkm} lkm | Hoehenmeter: {self.tot_hm_pos} m und {self.tot_hm_neg} m | Marschzeit: {self.tot_marschzeit_h}:{self.tot_marschzeit_min} h")
+            self.ui.labelSummary.setText(f"Gesamtsumme: Distanz: {self.tot_dist} km bzw. {self.tot_lkm} lkm | Hoehenmeter: {self.tot_hm_pos} m und {self.tot_hm_neg} m | Marschzeit: {self.tot_marschzeit_h}:{self.tot_marschzeit_min} h")
             # Ausgabe des Geodatframes für den Export
 
             #progressbar Value auf 100% setzen
-            self.progressBar.setValue(100)
+            self.ui.progressBar.setValue(100)
 
             return self.gdf_calc
 
@@ -179,14 +183,14 @@ class MarschzeitBerechnung(QWidget):
 
     def export_pdf(self):
         #progressbar Value auf 10 setzen
-        self.progressBar.setValue(10)
+        self.ui.progressBar.setValue(10)
 
         
         self.filename_s, typ= QFileDialog.getSaveFileName(self, "Datei Speichern",
                                                    "",
                                                    "PDF (*.PDF)")
         #progressbar Value auf 30 setzen
-        self.progressBar.setValue(30)
+        self.ui.progressBar.setValue(30)
 
         # Abfrage des Exportformats aus dem Droppdown Menü
         self.export_format = self.comboBoxExportFormat.currentText()
@@ -194,7 +198,7 @@ class MarschzeitBerechnung(QWidget):
         export_to_pdf(self.gdf_calc, self.filename_s,self.input_geschwindigkeit, self.tot_dist, self.tot_lkm, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min, self.input_titel, self.input_ersteller, self.input_erstellerdatum, self.export_format)
         
         #progressbar Value auf 90 setzen
-        self.progressBar.setValue(90)
+        self.ui.progressBar.setValue(90)
 
         # PDF automatisch öffnen
         if self.filename_s:
@@ -206,12 +210,12 @@ class MarschzeitBerechnung(QWidget):
                 subprocess.call(['xdg-open', self.filename_s])
 
         #progressbar Value auf 100 setzen
-        self.progressBar.setValue(100)
+        self.ui.progressBar.setValue(100)
 
         
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    fenster = MarschzeitBerechnung()
+    fenster = MarschzeitFenster()
     fenster.show()
     sys.exit(app.exec_())
