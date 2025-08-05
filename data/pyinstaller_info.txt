@@ -1,8 +1,0 @@
-## Codeziele für pyinstaller
-pyinstaller main.py --onefile --windowed --hidden-import=rasterio.sample --name Marschzeitberechnung --icon=../icons/logo.ico
-
-
-## Von der SPec-Datei
-pyinstaller Marschzeitberechnung.spec
-
-## Troubleshoot: In der Spec-Datei debug=true setzen

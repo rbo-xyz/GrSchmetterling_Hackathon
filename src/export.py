@@ -407,14 +407,15 @@ def export_to_pdf(
             "C://temp_schmetterling/map.png", w, h)
         c.drawImage("C://temp_schmetterling/map.png", x, y, width=draw_width, height=draw_height)
 
-        # if os.path.exists(image_path):
-        #     os.remove(image_path)
+        # ## Cleanup: remove temporary images if they exist
+        # if os.path.exists("C://temp_schmetterling/elevation.png"):
+        #     os.remove("C://temp_schmetterling/elevation.png")
 
-        # if os.path.exists(image_path2):
-        #     os.remove(image_path2)
+        # if os.path.exists("C://temp_schmetterling/map.png"):
+        #     os.remove("C://temp_schmetterling/map.png")
 
-        # path = "C://temp_schmetterling"
-        # if os.path.exists(path):
-        #     os.rmdir(path)
+        # ## Cleanup: remove temporary directory if it exists
+        # if os.path.exists("C://temp_schmetterling"):
+        #     os.rmdir("C://temp_schmetterling")
 
     c.save()

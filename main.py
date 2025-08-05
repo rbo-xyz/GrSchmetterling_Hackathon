@@ -23,7 +23,7 @@ import platform
 import subprocess
 
 # UI aus .py-Datei importieren
-# from src.UserInterface_ui_embedded import Ui_MarschzeitBerechnung
+# from UserInterface_ui_embedded import Ui_MarschzeitBerechnung
 
 ## Generierung des .py-Files aus der .ui Datei --> Eingabe im Terminal
 #  pyuic5 -x src/UserInterface.ui -o src/UserInterface_ui_embedded.py
@@ -195,7 +195,7 @@ class MarschzeitFenster(QWidget):
         self.ui.progressBar.setValue(30)
 
         # Abfrage des Exportformats aus dem Droppdown Menü
-        self.export_format = self.comboBoxExportFormat.currentText()
+        self.export_format = self.ui.comboBoxExportFormat.currentText()
 
         export_to_pdf(self.gdf_calc, self.filename_s,self.input_geschwindigkeit, self.tot_dist, self.tot_lkm, self.tot_hm_pos, self.tot_hm_neg, self.tot_marschzeit_h, self.tot_marschzeit_min, self.input_titel, self.input_ersteller, self.input_erstellerdatum, self.export_format)
         

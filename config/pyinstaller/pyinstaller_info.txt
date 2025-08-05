@@ -1,0 +1,15 @@
+## Codeziele für die inizialle spec-Datei
+pyinstaller main.py --onefile --windowed --hidden-import=rasterio.sample --name Marschzeitberechnung --icon=../icons/logo.ico
+
+## Spec Datei nutzen um die App zu Builden
+pyinstaller Marschzeitberechnung.spec
+
+## Anletiung um die App zu erstellen:
+1) main.py in den src-Ordner ziehen
+2) Imports im Main.py ändern, dass nicht mehr von src importiert wird.
+3) Kommentare ändern um auf den py-Design zu ändern
+4) Import im export.py ändern --> Kein src Import
+5) .sepc-Datei in den src-Ordner ziehen
+6) Im Anaconda-Prompt mit installiertem pyinstaller-Modul mit cd in den src Ordner gehen
+7) Im Terminal den spec-Befehl ausführen
+8) .exe befindet sich im dist-Ordner
