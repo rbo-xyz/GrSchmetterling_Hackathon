@@ -405,7 +405,7 @@ def export_to_pdf(
         # Größe abfragen
         x, y, draw_width, draw_height = get_scaled_centered_image_params(
             "C://temp_schmetterling/map.png", w, h)
-        c.drawImage("C://temp_schmetterling/map.png", x - draw_width / 2, y - draw_width / 2, width=draw_width * 2, height=draw_height * 2)
+        c.drawImage("C://temp_schmetterling/map.png", x, y, width=draw_width, height=draw_height)
 
         # if os.path.exists(image_path):
         #     os.remove(image_path)

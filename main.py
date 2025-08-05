@@ -107,16 +107,16 @@ class MarschzeitFenster(QWidget):
 
 
             # Zugriff auf die Meta-Informationen aus dem UI (hier eingesetzt, da die Variablen abgefüllt sein müssen!)
-            self.input_titel = self.lineEditTitel.text().strip()
+            self.input_titel = self.ui.lineEditTitel.text().strip()
             #Abrage ob Geschwindikeit eingegeben wurde um Programmabsturz zu vermeiden
             try:
-                self.input_geschwindigkeit = float(self.lineEditSpeed.text().strip())
+                self.input_geschwindigkeit = float(self.ui.lineEditSpeed.text().strip())
             except ValueError:
                 QMessageBox.critical(self, "Ungültige Eingabe", "Bitte eine gültige Geschwindigkeit in km/h eingeben.")
                 self.ui.progressBar.setValue(0)
                 return
-            self.input_ersteller = self.lineEditErsteller.text().strip()
-            self.input_erstellerdatum = self.dateEditDatum.date().toString("dd.MM.yyyy")
+            self.input_ersteller = self.ui.lineEditErsteller.text().strip()
+            self.input_erstellerdatum = self.ui.dateEditDatum.date().toString("dd.MM.yyyy")
 
 
             # Berechnung der Leistungskilometer, Marschzeit, Distanz und Höhenmeter
