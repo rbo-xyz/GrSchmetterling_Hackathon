@@ -25,6 +25,8 @@ import subprocess
 # UI aus .py-Datei importieren
 # from src.UserInterface_ui_embedded import Ui_MarschzeitBerechnung
 
+## Generierung des .py-Files aus der .ui Datei --> Eingabe im Terminal
+#  pyuic5 -x src/UserInterface.ui -o src/UserInterface_ui_embedded.py
 
 class MarschzeitFenster(QWidget):
     def __init__(self):
